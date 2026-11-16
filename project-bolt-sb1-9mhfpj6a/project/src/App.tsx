@@ -197,3 +197,41 @@ export default function App() {
                 </select>
               </div>
               <div>
+                <label className="text-slate-400 block mb-1">Background</label>
+                <select value={char.bg} onChange={(e) => setChar({ ...char, bg: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
+                  <option value="dark">Dark Studio</option>
+                  <option value="neon">Cyber Neon</option>
+                  <option value="sunset">Warm Sunset</option>
+                  <option value="greenscreen">Green Screen</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs text-slate-400">Fur/Skin:</span>
+              <div className="flex gap-1">
+                {['#f1c27d', '#8d5524', '#f97316', '#4ade80', '#94a3b8', '#a855f7'].map((t) => (
+                  <button key={t} onClick={() => setChar({ ...char, skin: t })} className={`w-4 h-4 rounded-full border ${char.skin === t ? 'border-white scale-110' : 'border-slate-600'}`} style={{ backgroundColor: t }} />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-700">
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Vocal Input</span><span>{(vol * 100).toFixed(0)}%</span>
+            </div>
+            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+              <div className="bg-indigo-500 h-full" style={{ width: `${Math.min(vol * 100, 100)}%` }} />
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 bg-slate-950 border border-slate-800 rounded-xl relative flex items-center justify-center min-h-[420px]">
+          <span className="absolute top-4 left-4 bg-slate-900/80 px-3 py-1 rounded text-xs text-slate-400 border border-slate-800 font-mono">
+            {is2D ? '2D Creature Rig' : '3D WebGL Mesh'}
+          </span>
+          {rec && <span className="absolute top-4 right-4 bg-rose-600 px-3 py-1 rounded text-xs font-bold animate-pulse">REC</span>}
+          <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
