@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// Character Customization Types
 interface CharacterTraits {
   name: string;
   accentTag: string;
@@ -52,12 +51,10 @@ export default function App() {
   const [volume, setVolume] = useState<number>(0);
   const [isBlinking, setIsBlinking] = useState<boolean>(false);
 
-  // Accent AI & Customization State
   const [isScanningAccent, setIsScanningAccent] = useState<boolean>(false);
   const [detectedTranscript, setDetectedTranscript] = useState<string>('');
   const [character, setCharacter] = useState<CharacterTraits>(PERSONA_PRESETS.default);
 
-  // Audio & Canvas Refs
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
@@ -65,11 +62,9 @@ export default function App() {
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Recorder Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
 
-  // Natural Blinking Loop
   useEffect(() => {
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
@@ -78,14 +73,12 @@ export default function App() {
     return () => clearInterval(blinkInterval);
   }, []);
 
-  // Draw the Modular 2D Base Character onto the Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Background
     ctx.fillStyle = '#090d16';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -112,7 +105,7 @@ export default function App() {
       ctx.strokeStyle = 'rgba(0,0,0,0.2)';
       ctx.stroke();
 
-      // 4. Eyes (Blink & React to Volume)
+      // 4. Eyes
       const eyeY = cy - 15;
       if (isBlinking) {
         ctx.strokeStyle = '#1e293b';
@@ -124,13 +117,12 @@ export default function App() {
         ctx.lineTo(cx + 42, eyeY);
         ctx.stroke();
       } else {
-        // White sclera
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(cx - 30, eyeY, 13, 0, Math.PI * 2);
         ctx.arc(cx + 30, eyeY, 13, 0, Math.PI * 2);
         ctx.fill();
-        // Pupils
+
         ctx.fillStyle = '#0f172a';
         ctx.beginPath();
         ctx.arc(cx - 30, eyeY, 6, 0, Math.PI * 2);
@@ -138,7 +130,7 @@ export default function App() {
         ctx.fill();
       }
 
-      // 5. Expressive Eyebrows (Raise dynamically with voice volume!)
+      // 5. Eyebrows
       const browLift = Math.min(volume * 14, 12);
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 5;
@@ -156,7 +148,7 @@ export default function App() {
       ctx.beginPath();
       ctx.ellipse(cx, cy + 35, 26, mouthHeight, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Tongue hint when speaking loud
+
       if (mouthHeight > 16) {
         ctx.fillStyle = '#fb7185';
         ctx.beginPath();
@@ -178,11 +170,9 @@ export default function App() {
         ctx.fill();
       } else if (character.hairStyle === 'cowboyHat') {
         ctx.fillStyle = '#78350f';
-        // Brim
         ctx.beginPath();
         ctx.ellipse(cx, cy - 70, 115, 22, 0, 0, Math.PI * 2);
         ctx.fill();
-        // Crown
         ctx.beginPath();
         ctx.roundRect(cx - 55, cy - 125, 110, 60, 20);
         ctx.fill();
@@ -238,9 +228,7 @@ export default function App() {
       ctx.arc(cx, cy, 70 + volume * 20, 0, Math.PI * 2);
       ctx.strokeStyle = '#6366f1';
       ctx.lineWidth = 4;
-      ctx.setLineDash([8, 8]);
       ctx.stroke();
-      ctx.setLineDash([]);
 
       ctx.fillStyle = '#94a3b8';
       ctx.font = '14px monospace';
@@ -249,7 +237,6 @@ export default function App() {
     }
   }, [volume, isTrack2D, isBlinking, character]);
 
-  // Free Browser Accent & Speech Analyzer
   const scanVoiceForAccent = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -271,7 +258,6 @@ export default function App() {
       const speechResult = event.results[0][0].transcript.toLowerCase();
       setDetectedTranscript(`Heard: "${speechResult}"`);
 
-      // Match dialect markers, cadence, or regional phrasing to generate a character
       if (
         speechResult.includes("y'all") ||
         speechResult.includes('howdy') ||
@@ -297,5 +283,22 @@ export default function App() {
       ) {
         setCharacter(PERSONA_PRESETS.ny);
       } else {
-        // Generate a randomized custom character based on vocal length/cadence
         const styles: CharacterTraits['hairStyle'][] = ['spiky', 'bob', 'cowboyHat', 'beanie'];
+        const accessories: CharacterTraits['accessory'][] = ['glasses', 'sunglasses', 'monocle', 'none'];
+        const randomStyle = styles[speechResult.length % styles.length];
+        const randomAcc = accessories[speechResult.split(' ').length % accessories.length];
+
+        setCharacter({
+          name: 'Custom AI Persona',
+          accentTag: 'Detected Custom Cadence',
+          skinColor: '#e0ac69',
+          shirtColor: '#0d9488',
+          hairStyle: randomStyle,
+          accessory: randomAcc,
+        });
+      }
+      setIsScanningAccent(false);
+    };
+
+    recognition.onerror = () => {
+      setIsScanningAccent(false);
