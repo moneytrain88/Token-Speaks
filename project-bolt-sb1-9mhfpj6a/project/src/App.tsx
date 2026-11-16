@@ -240,29 +240,20 @@ export default function App() {
       ctx.fillText('3D WebGL Mesh Ready', cx, cy + 120);
     }
   }, [vol, is2D, blink, char]);
-  const scanAccent = () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return alert('Try Chrome or Edge for live speech recognition!');
-    const r = new SR();
-    r.lang = 'en-US';
-    setScanning(true);
-    setHeard('Listening... speak a phrase!');
-    r.onresult = (e: any) => {
-      const txt = e.results.item(0).item(0).transcript.toLowerCase();
-      setHeard(`Heard: "${txt}"`);
-      if (txt.includes("y'all") || txt.includes('howdy') || txt.includes('reckon')) setChar(PRESETS.southern);
-      else if (txt.includes('mate') || txt.includes('brilliant') || txt.includes('innit')) setChar(PRESETS.british);
-      else if (txt.includes('yo') || txt.includes('bro') || txt.includes('coffee')) setChar(PRESETS.ny);
-      else {
-        const h: Traits['hair'][] = ['spiky', 'bob', 'cowboyHat', 'beanie'];
-        const a: Traits['acc'][] = ['glasses', 'sunglasses', 'monocle', 'none'];
-        const b: Traits['beard'][] = ['none', 'goatee', 'full', 'mustache'];
-        setChar({ name: 'Custom AI Persona', accent: 'Custom Cadence', skin: '#e0ac69', shirt: '#0d9488', hair: h[txt.length % 4], acc: a[txt.split(' ').length % 4], beard: b[txt.length % 4], bg: 'neon' });
-      }
+    const scanAccent = async () => {
+    try {
+      setScanning(true);
+      setHeard('Listening for 3.5s... speak naturally in any accent!');
+      const profile = await analyzeAcousticVoice(3500);
+      setHeard(
+        `${profile.detectedStyle} (${profile.pitchHz}Hz • ${profile.paceLabel} • ${profile.confidence}% match)`
+      );
+      setChar(PRESETS[profile.suggestedPresetKey]);
+    } catch {
+      setHeard('Microphone access needed for acoustic scan.');
+    } finally {
       setScanning(false);
-    };
-    r.onerror = () => { setScanning(false); setHeard('Could not catch that—try again!'); };
-    r.start();
+    }
   };
 
   const toggleMic = async () => {
