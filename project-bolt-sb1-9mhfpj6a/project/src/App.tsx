@@ -20,7 +20,7 @@ export default function App() {
   const [blink, setBlink] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [heard, setHeard] = useState('');
-  const [char, setChar] = useState<Traits>(PRESETS.southern);
+  const [char, setChar] = useState<Traits>(PRESETS.savannah);
 
   const audioCtx = useRef<AudioContext | null>(null);
   const analyser = useRef<AnalyserNode | null>(null);
