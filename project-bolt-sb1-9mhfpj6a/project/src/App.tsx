@@ -151,7 +151,6 @@ export default function App() {
       ctx.fillText('3D WebGL Mesh Ready', cx, cy + 120);
     }
   }, [vol, is2D, blink, char]);
-
   const scanAccent = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return alert('Try Chrome or Edge for live speech recognition!');
@@ -239,3 +238,84 @@ export default function App() {
       <header className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
         <h1 className="text-xl font-bold text-indigo-400">VoxAnim Studio Live</h1>
         <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+          <button onClick={() => setIs2D(true)} className={`px-4 py-1.5 rounded text-sm ${is2D ? 'bg-indigo-600' : 'text-slate-400'}`}>2D Cartoon</button>
+          <button onClick={() => setIs2D(false)} className={`px-4 py-1.5 rounded text-sm ${!is2D ? 'bg-indigo-600' : 'text-slate-400'}`}>3D Realistic</button>
+        </div>
+      </header>
+      <div className="flex-1 flex flex-col md:flex-row p-6 gap-6">
+        <div className="w-full md:w-96 bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col justify-between space-y-5">
+          <div className="space-y-3">
+            <h2 className="text-xs font-bold uppercase text-slate-400">1. Live Audio & Recording</h2>
+            <button onClick={toggleMic} className={`w-full py-3 rounded-xl font-bold border ${mic ? 'bg-emerald-600 border-emerald-500' : 'bg-slate-700 border-slate-600'}`}>
+              {mic ? 'Microphone Active' : 'Tap to Activate Mic'}
+            </button>
+            <button onClick={rec ? stopRec : startRec} className={`w-full py-2.5 rounded-xl font-medium border ${rec ? 'bg-rose-600 border-rose-500 animate-pulse' : 'bg-slate-700 border-slate-600'}`}>
+              {rec ? 'Stop & Download Clip' : 'Start Recording Clip'}
+            </button>
+          </div>
+          <div className="space-y-3 pt-4 border-t border-slate-700">
+            <h2 className="text-xs font-bold uppercase text-indigo-400">2. AI Accent Persona Builder</h2>
+            <button onClick={scanAccent} disabled={scanning} className="w-full py-2.5 px-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500">
+              {scanning ? 'Listening...' : 'Scan Voice & Build Character'}
+            </button>
+            {heard && <p className="text-xs text-slate-300 bg-slate-900 p-2 rounded">{heard}</p>}
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(PRESETS).map(([k, p]) => (
+                <button key={k} onClick={() => setChar(p)} className={`text-xs py-1.5 px-2 rounded border text-left truncate ${char.name === p.name ? 'bg-indigo-900 border-indigo-500' : 'bg-slate-700 border-slate-600'}`}>
+                  {p.accent}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-3 pt-4 border-t border-slate-700">
+            <h2 className="text-xs font-bold uppercase text-slate-400">3. Customize Base Character</h2>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1">Hair / Hat</label>
+                <select value={char.hair} onChange={(e) => setChar({ ...char, hair: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
+                  <option value="spiky">Spiky Hair</option>
+                  <option value="cowboyHat">Cowboy Hat</option>
+                  <option value="beanie">Beanie</option>
+                  <option value="bob">Classic Bob</option>
+                  <option value="none">Clean</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-slate-400 block mb-1">Eyewear</label>
+                <select value={char.acc} onChange={(e) => setChar({ ...char, acc: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
+                  <option value="glasses">Glasses</option>
+                  <option value="sunglasses">Shades</option>
+                  <option value="monocle">Monocle</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs text-slate-400">Skin Tone:</span>
+              <div className="flex gap-2">
+                {['#ffdbac', '#f1c27d', '#e0ac69', '#8d5524', '#3d2314'].map((t) => (
+                  <button key={t} onClick={() => setChar({ ...char, skin: t })} className={`w-5 h-5 rounded-full border ${char.skin === t ? 'border-white scale-110' : 'border-slate-600'}`} style={{ backgroundColor: t }} />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="pt-3 border-t border-slate-700">
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Vocal Input</span><span>{(vol * 100).toFixed(0)}%</span>
+            </div>
+            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+              <div className="bg-indigo-500 h-full" style={{ width: `${Math.min(vol * 100, 100)}%` }} />
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 bg-slate-950 border border-slate-800 rounded-xl relative flex items-center justify-center min-h-[420px]">
+          <span className="absolute top-4 left-4 bg-slate-900 px-3 py-1 rounded text-xs text-slate-400 border border-slate-800 font-mono">
+            {is2D ? '2D Base Rig' : '3D WebGL Mesh'}
+          </span>
+          {rec && <span className="absolute top-4 right-4 bg-rose-600 px-3 py-1 rounded text-xs font-bold animate-pulse">REC</span>}
+          <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
