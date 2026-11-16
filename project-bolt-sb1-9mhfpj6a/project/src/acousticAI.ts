@@ -53,11 +53,11 @@ export async function analyzeAndGenerateCharacter(durationMs = 3500): Promise<Ac
           : Math.floor(110 + Math.random() * 110);
 
         const sps = +(syllablePeaks / (durationMs / 1000)).toFixed(1);
-        const register = avgPitch < 140 ? 'Deep Bass' : avgPitch < 175 ? 'Warm Mid-Tone' : 'High Register';
+        const register = avgPitch < 165 ? 'Deep Bass' : avgPitch < 215 ? 'Warm Baritone' : 'Bright High-Register';
         const cadence = sps < 2.5 ? 'Melodic Drawl' : sps > 4.0 ? 'Rapid Staccato' : 'Crisp Cadence';
 
         const jitter = Math.floor(Math.random() * 1000);
-        const isFem = avgPitch >= 165 || jitter % 2 === 0;
+        const isFem = avgPitch >= 215;
         const species = SPECIES_LIST[(avgPitch + jitter) % SPECIES_LIST.length];
         const palette = WILD_COLORS[species];
         const namePool = isFem ? FEM_NAMES : MASC_NAMES;
