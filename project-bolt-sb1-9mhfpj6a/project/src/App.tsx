@@ -241,21 +241,20 @@ export default function App() {
       ctx.fillText('3D WebGL Mesh Ready', cx, cy + 120);
     }
   }, [vol, is2D, blink, char]);
-    const scanAccent = async () => {
-    try {
-      setScanning(true);
-      setHeard('Listening for 3.5s... speak naturally in any accent!');
-      const profile = await analyzeAcousticVoice(3500);
-      setHeard(
-        `${profile.detectedStyle} (${profile.pitchHz}Hz • ${profile.paceLabel} • ${profile.confidence}% match)`
-      );
-      setChar(PRESETS[profile.suggestedPresetKey]);
-    } catch {
-      setHeard('Microphone access needed for acoustic scan.');
-    } finally {
-      setScanning(false);
-    }
-  };
+  const scanAccent = async () => {
+  try {
+    setScanning(true);
+    setHeard('Listening for 3.5s... speak naturally in any accent!');
+    const result = await analyzeAndGenerateCharacter(3500);
+    setHeard(result.summary);
+    setChar(result.character);
+  } catch {
+    setHeard('Microphone access needed for acoustic scan.');
+  } finally {
+    setScanning(false);
+  }
+};
+
 
   const toggleMic = async () => {
     if (mic) {
