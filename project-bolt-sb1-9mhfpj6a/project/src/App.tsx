@@ -86,7 +86,7 @@ export default function App() {
     const cy = canvas.height / 2 + 10;
 
     if (isTrack2D) {
-      // 1. Shoulders / Shirt
+      // 1. Shoulders
       ctx.fillStyle = character.shirtColor;
       ctx.beginPath();
       ctx.ellipse(cx, cy + 145, 110, 65, 0, Math.PI, 0);
@@ -96,7 +96,7 @@ export default function App() {
       ctx.fillStyle = character.skinColor;
       ctx.fillRect(cx - 22, cy + 65, 44, 40);
 
-      // 3. Base Head Shape
+      // 3. Base Head
       ctx.fillStyle = character.skinColor;
       ctx.beginPath();
       ctx.roundRect(cx - 65, cy - 85, 130, 160, 55);
@@ -142,7 +142,7 @@ export default function App() {
       ctx.lineTo(cx + 45, eyeY - 22 - browLift);
       ctx.stroke();
 
-      // 6. Reactive Mouth
+      // 6. Mouth
       const mouthHeight = Math.max(4, volume * 42);
       ctx.fillStyle = '#9f1239';
       ctx.beginPath();
@@ -156,7 +156,7 @@ export default function App() {
         ctx.fill();
       }
 
-      // 7. Hair / Hats Layer
+      // 7. Hair & Hats
       if (character.hairStyle === 'spiky') {
         ctx.fillStyle = '#1e293b';
         ctx.beginPath();
@@ -192,7 +192,7 @@ export default function App() {
         ctx.fill();
       }
 
-      // 8. Accessories Layer
+      // 8. Accessories
       if (character.accessory === 'glasses') {
         ctx.strokeStyle = '#0f172a';
         ctx.lineWidth = 4;
@@ -215,7 +215,7 @@ export default function App() {
         ctx.stroke();
       }
 
-      // Persona Badge Overlay
+      // Persona Badge
       ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
       ctx.fillRect(12, canvas.height - 38, canvas.width - 24, 26);
       ctx.fillStyle = '#a5b4fc';
@@ -223,7 +223,7 @@ export default function App() {
       ctx.textAlign = 'center';
       ctx.fillText(`${character.name} • ${character.accentTag}`, cx, canvas.height - 21);
     } else {
-      // 3D Placeholder Ring
+      // 3D Placeholder
       ctx.beginPath();
       ctx.arc(cx, cy, 70 + volume * 20, 0, Math.PI * 2);
       ctx.strokeStyle = '#6366f1';
@@ -255,8 +255,7 @@ export default function App() {
     setDetectedTranscript('Listening... say a phrase in your accent!');
 
     recognition.onresult = (event: any) => {
-      const firstResult = event.results[0];
-      const speechResult = firstResult[0].transcript.toLowerCase();
+      const speechResult = event.results[0][0].transcript.toLowerCase();
       setDetectedTranscript(`Heard: "${speechResult}"`);
 
       if (
@@ -303,3 +302,6 @@ export default function App() {
 
     recognition.onerror = () => {
       setIsScanningAccent(false);
+      setDetectedTranscript('Could not catch that—try speaking a bit louder!');
+    };
+
