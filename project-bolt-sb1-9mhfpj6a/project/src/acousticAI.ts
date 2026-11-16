@@ -20,11 +20,35 @@ const WILD_COLORS: Record<Traits['species'], string[]> = {
 
 const SPECIES_LIST: Traits['species'][] = ['human', 'cat', 'robot', 'alien', 'bear', 'monster'];
 const SHIRTS = ['#4f46e5', '#dc2626', '#059669', '#d97706', '#0284c7', '#7c3aed', '#db2777', '#374151'];
-const FEM_HAIRS: Traits['hair'][] = ['longWaves', 'ponytail', 'buns', 'bob', 'cowboyHat'];
-const MASC_HAIRS: Traits['hair'][] = ['spiky', 'cowboyHat', 'beanie', 'bob', 'none'];
+const FEM_HAIRS: Traits['hair'][] = ['longWaves', 'ponytail', 'buns', 'bob'];
+const MASC_HAIRS: Traits['hair'][] = ['spiky', 'cowboyHat', 'beanie', 'none'];
 const ACCS: Traits['acc'][] = ['glasses', 'sunglasses', 'monocle', 'none'];
 const BEARDS: Traits['beard'][] = ['none', 'mustache', 'goatee', 'full'];
 const BGS: Traits['bg'][] = ['dark', 'neon', 'sunset'];
+
+function detectFundamentalPitch(buf: Float32Array, sampleRate: number): number {
+  let rms = 0;
+  for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / buf.length);
+  if (rms < 0.025) return -1;
+
+  const minPeriod = Math.floor(sampleRate / 320);
+  const maxPeriod = Math.floor(sampleRate / 70);
+  let bestOffset = -1;
+  let bestCorr = 0;
+
+  for (let offset = minPeriod; offset <= maxPeriod; offset++) {
+    let corr = 0;
+    for (let i = 0; i < buf.length - offset; i++) {
+      corr += buf[i] * buf[i + offset];
+    }
+    if (corr > bestCorr) {
+      bestCorr = corr;
+      bestOffset = offset;
+    }
+  }
+  return bestOffset > 0 ? sampleRate / bestOffset : -1;
+}
 
 export async function analyzeAndGenerateCharacter(durationMs = 3500): Promise<AcousticResult> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -36,7 +60,6 @@ export async function analyzeAndGenerateCharacter(durationMs = 3500): Promise<Ac
   source.connect(analyser);
 
   const buffer = new Float32Array(analyser.fftSize);
-  const freqData = new Uint8Array(analyser.frequencyBinCount);
   const pitches: number[] = [];
   let syllablePeaks = 0;
   let wasLoud = false;
@@ -48,16 +71,18 @@ export async function analyzeAndGenerateCharacter(durationMs = 3500): Promise<Ac
         stream.getTracks().forEach((t) => t.stop());
         ctx.close();
 
+        // Use median pitch to ignore outlier spikes
+        pitches.sort((a, b) => a - b);
         const avgPitch = pitches.length
-          ? Math.round(pitches.reduce((a, b) => a + b, 0) / pitches.length)
-          : Math.floor(110 + Math.random() * 110);
+          ? Math.round(pitches[Math.floor(pitches.length / 2)])
+          : 125;
 
         const sps = +(syllablePeaks / (durationMs / 1000)).toFixed(1);
-        const register = avgPitch < 165 ? 'Deep Bass' : avgPitch < 215 ? 'Warm Baritone' : 'Bright High-Register';
+        const register = avgPitch < 130 ? 'Deep Bass' : avgPitch < 165 ? 'Warm Baritone' : 'High Register';
         const cadence = sps < 2.5 ? 'Melodic Drawl' : sps > 4.0 ? 'Rapid Staccato' : 'Crisp Cadence';
 
         const jitter = Math.floor(Math.random() * 1000);
-        const isFem = avgPitch >= 215;
+        const isFem = avgPitch >= 165;
         const species = SPECIES_LIST[(avgPitch + jitter) % SPECIES_LIST.length];
         const palette = WILD_COLORS[species];
         const namePool = isFem ? FEM_NAMES : MASC_NAMES;
@@ -77,27 +102,21 @@ export async function analyzeAndGenerateCharacter(durationMs = 3500): Promise<Ac
         };
 
         resolve({
-          summary: `Built ${species.toUpperCase()}: "${character.name}" (${avgPitch}Hz • ${cadence})`,
+          summary: `Built ${isFem ? 'Female' : 'Male'} ${species.toUpperCase()}: "${character.name}" (${avgPitch}Hz • ${cadence})`,
           character,
         });
         return;
       }
 
       analyser.getFloatTimeDomainData(buffer);
-      analyser.getByteFrequencyData(freqData);
       const rms = Math.sqrt(buffer.reduce((sum, val) => sum + val * val, 0) / buffer.length);
 
       if (rms > 0.04 && !wasLoud) { syllablePeaks++; wasLoud = true; }
       else if (rms < 0.02) { wasLoud = false; }
 
-      if (rms > 0.03) {
-        let maxVal = -1, maxIdx = 0;
-        for (let i = 4; i < 65; i++) {
-          if (freqData[i] > maxVal) { maxVal = freqData[i]; maxIdx = i; }
-        }
-        const hz = (maxIdx * ctx.sampleRate) / analyser.fftSize;
-        if (hz >= 75 && hz <= 340) pitches.push(hz);
-      }
+      const hz = detectFundamentalPitch(buffer, ctx.sampleRate);
+      if (hz >= 75 && hz <= 310) pitches.push(hz);
+
       requestAnimationFrame(sampleLoop);
     };
     sampleLoop();
