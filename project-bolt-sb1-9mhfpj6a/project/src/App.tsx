@@ -413,3 +413,22 @@ export default function App() {
             </div>
           </div>
           <div className="pt-2 border-t border-slate-700">
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Vocal Input</span><span>{(vol * 100).toFixed(0)}%</span>
+            </div>
+            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+              <div className="bg-indigo-500 h-full" style={{ width: `${Math.min(vol * 100, 100)}%` }} />
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 bg-slate-950 border border-slate-800 rounded-xl relative flex items-center justify-center min-h-[420px]">
+          <span className="absolute top-4 left-4 bg-slate-900/80 px-3 py-1 rounded text-xs text-slate-400 border border-slate-800 font-mono">
+            {is2D ? '2D Base Rig' : '3D WebGL Mesh'}
+          </span>
+          {rec && <span className="absolute top-4 right-4 bg-rose-600 px-3 py-1 rounded text-xs font-bold animate-pulse">REC</span>}
+          <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
