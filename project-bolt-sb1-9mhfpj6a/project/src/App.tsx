@@ -3,11 +3,14 @@ import { analyzeAndGenerateCharacter } from './acousticAI';
 import { Traits, draw2DCharacter } from './CharacterRenderer';
 
 const PRESETS: Record<string, Traits> = {
-  southern: { name: 'Tex', accent: 'Southern US', species: 'human', skin: '#f1c27d', shirt: '#b45309', hair: 'cowboyHat', acc: 'none', beard: 'mustache', bg: 'sunset' },
-  cat: { name: 'DJ Whiskers', accent: 'Cool Feline', species: 'cat', skin: '#f97316', shirt: '#4f46e5', hair: 'beanie', acc: 'sunglasses', beard: 'none', bg: 'neon' },
-  robot: { name: 'Unit-7', accent: 'Synth Bot', species: 'robot', skin: '#94a3b8', shirt: '#0284c7', hair: 'none', acc: 'none', beard: 'none', bg: 'dark' },
-  alien: { name: 'Zorgon', accent: 'Cosmic Visitor', species: 'alien', skin: '#4ade80', shirt: '#7c3aed', hair: 'none', acc: 'none', beard: 'none', bg: 'neon' },
+  savannah: { name: 'Savannah', accent: 'Southern Belle', species: 'human', skin: '#f1c27d', shirt: '#db2777', hair: 'longWaves', acc: 'none', beard: 'none', bg: 'sunset', lashes: true },
+  tex: { name: 'Tex', accent: 'Southern US', species: 'human', skin: '#f1c27d', shirt: '#b45309', hair: 'cowboyHat', acc: 'none', beard: 'mustache', bg: 'sunset', lashes: false },
+  luna: { name: 'Luna', accent: 'Cyber Star', species: 'alien', skin: '#f472b6', shirt: '#7c3aed', hair: 'buns', acc: 'none', beard: 'none', bg: 'neon', lashes: true },
+  cat: { name: 'DJ Whiskers', accent: 'Cool Feline', species: 'cat', skin: '#f97316', shirt: '#4f46e5', hair: 'beanie', acc: 'sunglasses', beard: 'none', bg: 'neon', lashes: false },
+  robot: { name: 'Unit-7', accent: 'Synth Bot', species: 'robot', skin: '#94a3b8', shirt: '#0284c7', hair: 'none', acc: 'none', beard: 'none', bg: 'dark', lashes: false },
+  zorgon: { name: 'Zorgon', accent: 'Cosmic Visitor', species: 'alien', skin: '#4ade80', shirt: '#7c3aed', hair: 'none', acc: 'none', beard: 'none', bg: 'neon', lashes: false },
 };
+
 
 export default function App() {
   const [is2D, setIs2D] = useState(true);
@@ -181,6 +184,10 @@ export default function App() {
                 <label className="text-slate-400 block mb-1">Hair / Hat</label>
                 <select value={char.hair} onChange={(e) => setChar({ ...char, hair: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
                   <option value="spiky">Spiky Hair</option>
+                  <option value="longWaves">Long Waves</option>
+                  <option value="ponytail">High Ponytail</option>
+                  <option value="buns">Twin Space Buns</option>
+
                   <option value="cowboyHat">Cowboy Hat</option>
                   <option value="beanie">Beanie</option>
                   <option value="bob">Classic Bob</option>
@@ -212,7 +219,13 @@ export default function App() {
                 {['#f1c27d', '#8d5524', '#f97316', '#4ade80', '#94a3b8', '#a855f7'].map((t) => (
                   <button key={t} onClick={() => setChar({ ...char, skin: t })} className={`w-4 h-4 rounded-full border ${char.skin === t ? 'border-white scale-110' : 'border-slate-600'}`} style={{ backgroundColor: t }} />
                 ))}
-              </div>
+              </div><button
+  onClick={() => setChar({ ...char, lashes: !char.lashes })}
+  className={`text-xs px-2 py-1 rounded border ${char.lashes ? 'bg-pink-600 border-pink-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-400'}`}
+>
+  {char.lashes ? 'Lashes: ON' : 'Lashes: OFF'}
+</button>
+
             </div>
           </div>
           <div className="pt-2 border-t border-slate-700">
