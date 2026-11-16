@@ -255,7 +255,7 @@ export default function App() {
     setDetectedTranscript('Listening... say a phrase in your accent!');
 
     recognition.onresult = (event: any) => {
-      const speechResult = event.results[0][0].transcript.toLowerCase();
+      const speechResult = event.results.item(0).item(0).transcript.toLowerCase();
       setDetectedTranscript(`Heard: "${speechResult}"`);
 
       if (
