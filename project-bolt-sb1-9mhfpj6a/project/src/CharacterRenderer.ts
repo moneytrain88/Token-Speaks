@@ -290,3 +290,6 @@ export function draw2DCharacter(
     ctx.fillStyle = '#a5b4fc';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
+    ctx.fillText(`${char.name} • ${char.accent}`, cx, h - 21);
+  }
+}
