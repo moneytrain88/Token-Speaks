@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { analyzeAcousticVoice } from './acousticAI';
+import { analyzeAndGenerateCharacter } from './acousticAI';
+
 
 interface Traits {
   name: string;
