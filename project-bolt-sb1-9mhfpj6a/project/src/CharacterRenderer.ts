@@ -185,12 +185,49 @@ export function draw2DCharacter(
   ctx.moveTo(cx + 15, eyeY - 25 - lift); ctx.lineTo(cx + 45, eyeY - 22 - lift);
   ctx.stroke();
 
+   // Dynamic jaw offset so facial hair moves as you speak
+  const jawFlex = Math.min(mH * 0.45, 14);
   ctx.fillStyle = '#1e293b';
-  if (char.beard === 'full') {
-    ctx.beginPath(); ctx.arc(cx, cy + 22, 63, 0.1 * Math.PI, 0.9 * Math.PI); ctx.fill();
+
+  if (char.beard === 'stubble') {
+    ctx.fillStyle = 'rgba(30, 41, 59, 0.22)';
+    ctx.beginPath();
+    ctx.arc(cx, cy + 20 + jawFlex * 0.4, 62, 0.08 * Math.PI, 0.92 * Math.PI);
+    ctx.fill();
+  } else if (char.beard === 'full') {
+    // Full Jaw-Hugging Beard + Mustache Bridge
+    ctx.beginPath();
+    ctx.moveTo(cx - 64, cy + 12);
+    ctx.bezierCurveTo(cx - 66, cy + 68 + jawFlex, cx - 32, cy + 82 + jawFlex, cx, cy + 84 + jawFlex);
+    ctx.bezierCurveTo(cx + 32, cy + 82 + jawFlex, cx + 66, cy + 68 + jawFlex, cx + 64, cy + 12);
+    ctx.quadraticCurveTo(cx + 38, cy + 32, cx + 26, cy + 26);
+    ctx.quadraticCurveTo(cx, cy + 16, cx - 26, cy + 26);
+    ctx.quadraticCurveTo(cx - 38, cy + 32, cx - 64, cy + 12);
+    ctx.fill();
+    // Soul Patch
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 48 + jawFlex * 0.7, 9, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
   } else if (char.beard === 'goatee') {
-    ctx.beginPath(); ctx.ellipse(cx, cy + 54, 22, 18, 0, 0, Math.PI * 2); ctx.fill();
+    // Sculpted Chin Goatee + Mustache Arch
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 54 + jawFlex * 0.8, 22, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx - 14, cy + 24, 15, 5, -0.18, 0, Math.PI * 2);
+    ctx.ellipse(cx + 14, cy + 24, 15, 5, 0.18, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (char.beard === 'mustache') {
+    // Tapered Handlebar Mustache
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 21);
+    ctx.bezierCurveTo(cx - 12, cy + 16, cx - 28, cy + 20, cx - 34, cy + 28);
+    ctx.bezierCurveTo(cx - 24, cy + 30, cx - 10, cy + 27, cx, cy + 25);
+    ctx.bezierCurveTo(cx + 10, cy + 27, cx + 24, cy + 30, cx + 34, cy + 28);
+    ctx.bezierCurveTo(cx + 28, cy + 20, cx + 12, cy + 16, cx, cy + 21);
+    ctx.fill();
   }
+
 
    const mH = Math.max(2, vol * 38);
   if (char.species === 'robot') {
