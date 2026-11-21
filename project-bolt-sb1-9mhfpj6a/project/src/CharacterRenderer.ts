@@ -192,7 +192,7 @@ export function draw2DCharacter(
     ctx.beginPath(); ctx.ellipse(cx, cy + 54, 22, 18, 0, 0, Math.PI * 2); ctx.fill();
   }
 
-  const mH = Math.max(4, vol * 40);
+   const mH = Math.max(2, vol * 38);
   if (char.species === 'robot') {
     ctx.fillStyle = '#0f172a'; ctx.fillRect(cx - 32, cy + 26, 64, 24);
     ctx.fillStyle = '#38bdf8';
@@ -201,18 +201,98 @@ export function draw2DCharacter(
       ctx.fillRect(cx - 26 + i * 11, cy + 38 - barH / 2, 7, barH);
     }
   } else {
-    // Full Lip Outline when Lashes/Lips style is enabled
-    if (char.lashes) {
+    const isFem2D = Boolean(char.lashes);
+    const openAmt = Math.min(mH, 32);
+    const mouthW = (isFem2D ? 25 : 29) - openAmt * 0.18;
+    const mouthY = cy + 36;
+    const upperPeakY = mouthY - (isFem2D ? 2.5 : 1.5) - openAmt * 0.32;
+    const lowerLipY = mouthY + (isFem2D ? 2.5 : 1.8) + openAmt * 0.72;
+
+    // 1. Inner Oral Cavity, Upper Teeth & Tongue (when speaking)
+    if (openAmt > 2.5) {
+      ctx.fillStyle = '#4c0519';
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW + 2, mouthY);
+      ctx.quadraticCurveTo(cx, upperPeakY + 1, cx + mouthW - 2, mouthY);
+      ctx.quadraticCurveTo(cx, lowerLipY - 1, cx - mouthW + 2, mouthY);
+      ctx.fill();
+
+      // Crisp Cartoon Upper Teeth
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW * 0.68, mouthY - openAmt * 0.06);
+      ctx.quadraticCurveTo(cx, upperPeakY + 2, cx + mouthW * 0.68, mouthY - openAmt * 0.06);
+      ctx.lineTo(cx + mouthW * 0.6, mouthY + Math.min(openAmt * 0.26, 6));
+      ctx.quadraticCurveTo(cx, mouthY + Math.min(openAmt * 0.3, 7), cx - mouthW * 0.6, mouthY + Math.min(openAmt * 0.26, 6));
+      ctx.closePath();
+      ctx.fill();
+
+      // Cartoon Tongue
+      if (openAmt > 7) {
+        ctx.fillStyle = '#fb7185';
+        ctx.beginPath();
+        ctx.ellipse(cx, lowerLipY - 3, mouthW * 0.48, openAmt * 0.28, 0, Math.PI, 0);
+        ctx.fill();
+      }
+    }
+
+    if (isFem2D) {
+      // FEMALE 2D: Cupid's Bow + Rose Lips + Cartoon Shine
       ctx.fillStyle = '#e11d48';
-      ctx.beginPath(); ctx.ellipse(cx, cy + 38, 28, mH + 4, 0, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.fillStyle = '#881337';
-    ctx.beginPath(); ctx.ellipse(cx, cy + 38, 24, mH, 0, 0, Math.PI * 2); ctx.fill();
-    if (mH > 14) {
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW, mouthY);
+      ctx.bezierCurveTo(cx - mouthW * 0.45, upperPeakY - 3.5, cx - 7, upperPeakY - 4, cx - 3.5, upperPeakY - 2);
+      ctx.lineTo(cx, upperPeakY - 0.8);
+      ctx.lineTo(cx + 3.5, upperPeakY - 2);
+      ctx.bezierCurveTo(cx + 7, upperPeakY - 4, cx + mouthW * 0.45, upperPeakY - 3.5, cx + mouthW, mouthY);
+      ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.3, cx - mouthW, mouthY);
+      ctx.fill();
+
       ctx.fillStyle = '#fb7185';
-      ctx.beginPath(); ctx.ellipse(cx, cy + 38 + mH * 0.35, 13, mH * 0.38, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW, mouthY);
+      ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.65, cx + mouthW, mouthY);
+      ctx.bezierCurveTo(cx + mouthW * 0.65, lowerLipY + 5.5, cx - mouthW * 0.65, lowerLipY + 5.5, cx - mouthW, mouthY);
+      ctx.fill();
+
+      // Cartoon Lip Shine
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(cx, lowerLipY + 1, mouthW * 0.35, 1.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // MALE 2D: Broader Natural Mouth Line, Corner Creases & Subtle Lower Lip
+      ctx.fillStyle = 'rgba(100, 45, 40, 0.45)';
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW, mouthY);
+      ctx.quadraticCurveTo(cx, upperPeakY - 2, cx + mouthW, mouthY);
+      ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.3, cx - mouthW, mouthY);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(130, 60, 52, 0.35)';
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW * 0.82, mouthY);
+      ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.65, cx + mouthW * 0.82, mouthY);
+      ctx.quadraticCurveTo(cx, lowerLipY + 4, cx - mouthW * 0.82, mouthY);
+      ctx.fill();
+
+      // Cartoon Corner Lines & Chin Accent
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - mouthW - 2, mouthY + 1); ctx.lineTo(cx - mouthW + 3, mouthY);
+      ctx.moveTo(cx + mouthW + 2, mouthY + 1); ctx.lineTo(cx + mouthW - 3, mouthY);
+      ctx.stroke();
     }
+
+    // Subtle Chin Line
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, lowerLipY + 8, isFem2D ? 10 : 14, 0.25 * Math.PI, 0.75 * Math.PI);
+    ctx.stroke();
   }
+
 
   if (char.beard === 'mustache') {
     ctx.fillStyle = '#1e293b';
