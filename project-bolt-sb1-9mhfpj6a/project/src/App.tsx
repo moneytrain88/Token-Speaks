@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { analyzeAndGenerateCharacter } from './acousticAI';
 import { Traits, draw2DCharacter } from './CharacterRenderer';
+import { Avatar3D } from './Avatar3D';
 
 const PRESETS: Record<string, Traits> = {
   savannah: { name: 'Savannah', accent: 'Southern Belle', species: 'human', skin: '#f1c27d', shirt: '#db2777', hair: 'longWaves', acc: 'none', beard: 'none', bg: 'sunset', lashes: true },
@@ -242,7 +243,12 @@ export default function App() {
             {is2D ? '2D Creature Rig' : '3D WebGL Mesh'}
           </span>
           {rec && <span className="absolute top-4 right-4 bg-rose-600 px-3 py-1 rounded text-xs font-bold animate-pulse">REC</span>}
-          <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
+          {is2D ? (
+  <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
+) : (
+  <Avatar3D vol={vol} char={char} blink={blink} canvasRef={canvasRef} />
+)}
+
         </div>
       </div>
     </div>
