@@ -3,6 +3,9 @@ import * as THREE from 'three';
 import { Traits } from './CharacterRenderer';
 
 interface Avatar3DProps {
+  const promptRef = useRef(customPrompt || '');
+useEffect(() => { promptRef.current = customPrompt || ''; }, [customPrompt]);
+
   vol: number;
   char: Traits;
   blink: boolean;
@@ -14,6 +17,9 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
   const volRef = useRef(vol);
   const blinkRef = useRef(blink);
   const charRef = useRef(char);
+  const promptRef = useRef(customPrompt || '');
+useEffect(() => { promptRef.current = customPrompt || ''; }, [customPrompt]);
+
   const rotRef = useRef({ x: 0.08, y: -0.25 }); // Slight 3D angle on load so depth is immediately obvious!
   const draggingRef = useRef(false);
 
@@ -135,6 +141,33 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
     const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 0.65, 20), skinMat);
     neck.position.set(0, -0.78, -0.05);
     scene.add(neck);
+// 7. 3D Custom Prompt Props (Shark Fin, Lion Mane, Crown, Wizard Hat, Pirate Patch, Horns)
+const finMesh = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.75, 16), skinMat);
+finMesh.position.set(0, 1.25, -0.05);
+finMesh.rotation.x = -0.25;
+
+const maneMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.85 });
+const maneMesh = new THREE.Mesh(new THREE.TorusGeometry(0.98, 0.28, 16, 32), maneMat);
+maneMesh.position.set(0, 0.18, -0.15);
+
+const crownMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.6, roughness: 0.25 });
+const crownMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.48, 0.35, 8), crownMat);
+crownMesh.position.set(0, 1.18, 0);
+
+const wizardMat = new THREE.MeshStandardMaterial({ color: 0x581c87, roughness: 0.6 });
+const wizardMesh = new THREE.Mesh(new THREE.ConeGeometry(0.75, 1.2, 24), wizardMat);
+wizardMesh.position.set(0, 1.45, 0);
+
+const patchMesh = new THREE.Mesh(new THREE.SphereGeometry(0.19, 16, 16), new THREE.MeshStandardMaterial({ color: 0x090d16 }));
+patchMesh.position.set(-0.32, 0.34, 0.84);
+
+const hornMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.4 });
+const leftHorn = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.65, 16), hornMat);
+leftHorn.position.set(-0.55, 1.1, 0); leftHorn.rotation.z = 0.45;
+const rightHorn = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.65, 16), hornMat);
+rightHorn.position.set(0.55, 1.1, 0); rightHorn.rotation.z = -0.45;
+
+headGroup.add(finMesh, maneMesh, crownMesh, wizardMesh, patchMesh, leftHorn, rightHorn);
 
     let animId: number;
     let clock = 0;
@@ -146,6 +179,23 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
       const ch = charRef.current;
 
       skinMat.color.set(ch.skin);
+      const p = promptRef.current.toLowerCase();
+if (p) {
+  if (p.includes('red')) skinMat.color.set(0xdc2626);
+  else if (p.includes('blue') || p.includes('shark')) skinMat.color.set(0x2563eb);
+  else if (p.includes('green') || p.includes('frog')) skinMat.color.set(0x16a34a);
+  else if (p.includes('gold') || p.includes('lion')) skinMat.color.set(0xeab308);
+  else if (p.includes('purple')) skinMat.color.set(0x9333ea);
+  else if (p.includes('pink')) skinMat.color.set(0xec4899);
+  else if (p.includes('orange') || p.includes('fox')) skinMat.color.set(0xea580c);
+}
+finMesh.visible = p.includes('shark');
+maneMesh.visible = p.includes('lion');
+crownMesh.visible = p.includes('crown') || p.includes('king') || p.includes('queen');
+wizardMesh.visible = p.includes('wizard') || p.includes('witch');
+patchMesh.visible = p.includes('pirate');
+leftHorn.visible = rightHorn.visible = p.includes('dragon') || p.includes('dino') || p.includes('demon') || p.includes('bunny');
+
       shirtMat.color.set(ch.shirt);
       lipMat.color.set(ch.lashes ? 0xe11d48 : 0x9f4a4a);
 
