@@ -179,6 +179,19 @@ const listenForCommand = () => {
             <button onClick={scanAccent} disabled={scanning} className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500">
               {scanning ? 'Listening...' : 'Scan Voice & Invent Character'}
             </button>
+                      <div className="space-y-2 pt-3 border-t border-slate-700">
+            <h2 className="text-xs font-bold uppercase text-indigo-400">2. AI Creature & Persona Builder</h2>
+            <button onClick={scanAccent} disabled={scanning} className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500">
+              {scanning ? 'Listening...' : 'Scan Voice & Invent Character'}
+            </button>
+            <button
+              onClick={listenForCommand}
+              disabled={scanning}
+              className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-500 text-white"
+            >
+              {scanning ? 'Listening...' : '🎙️ Voice Command (Edit by Voice)'}
+            </button>
+
             {heard && <p className="text-xs text-slate-300 bg-slate-900 p-2 rounded">{heard}</p>}
             <div className="grid grid-cols-2 gap-1.5">
               {Object.entries(PRESETS).map(([k, p]) => (
