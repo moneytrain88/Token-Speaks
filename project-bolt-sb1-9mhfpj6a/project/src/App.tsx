@@ -3,6 +3,8 @@ import { analyzeAndGenerateCharacter } from './acousticAI';
 import { Traits, draw2DCharacter } from './CharacterRenderer';
 import { Avatar3D } from './Avatar3D';
 import { parseVoiceCommand } from './voiceCommands';
+import { buildCharacterImageUrl } from './aiImageGen';
+import { CustomPuppet } from './CustomPuppet';
 
 const PRESETS: Record<string, Traits> = {
   savannah: { name: 'Savannah', accent: 'Southern Belle', species: 'human', skin: '#f1c27d', shirt: '#db2777', hair: 'longWaves', acc: 'none', beard: 'none', bg: 'sunset', lashes: true },
@@ -22,6 +24,9 @@ export default function App() {
   const [scanning, setScanning] = useState(false);
   const [heard, setHeard] = useState('');
   const [char, setChar] = useState<Traits>(PRESETS.savannah);
+const [customPrompt, setCustomPrompt] = useState('');
+const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+const [mouthOffset, setMouthOffset] = useState(0);
 
   const audioCtx = useRef<AudioContext | null>(null);
   const analyser = useRef<AnalyserNode | null>(null);
@@ -62,18 +67,28 @@ export default function App() {
     }
   };
 
-  const listenForCommand = () => {
+   const listenForCommand = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return alert('Try Chrome or Edge for live voice commands!');
     const r = new SR();
     r.lang = 'en-US';
     setScanning(true);
-    setHeard('Listening for command... (e.g. "put a cowboy hat on him")');
+    setHeard('Listening... say "create a pirate shark" or "put a cowboy hat on him"');
     r.onresult = (e: any) => {
       const spoken = e.results.item(0).item(0).transcript;
-      const { updated, feedback } = parseVoiceCommand(spoken, char);
-      setChar(updated);
-      setHeard(feedback);
+      const lower = spoken.toLowerCase();
+
+      if (lower.startsWith('create ') || lower.startsWith('draw ') || lower.startsWith('generate ')) {
+        const subject = spoken.replace(/^(create|draw|generate)\s+/i, '');
+        setCustomPrompt(subject);
+        setAiImageUrl(buildCharacterImageUrl(subject));
+        setHeard(`Generating AI Character: "${subject}"`);
+      } else {
+        setAiImageUrl(null);
+        const { updated, feedback } = parseVoiceCommand(spoken, char);
+        setChar(updated);
+        setHeard(feedback);
+      }
       setScanning(false);
     };
     r.onerror = () => {
@@ -82,6 +97,7 @@ export default function App() {
     };
     r.start();
   };
+
   const toggleMic = async () => {
     if (mic) {
       if (rec) stopRec();
