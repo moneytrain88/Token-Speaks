@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { analyzeAndGenerateCharacter } from './acousticAI';
 import { Traits, draw2DCharacter } from './CharacterRenderer';
 import { Avatar3D } from './Avatar3D';
+import { parseVoiceCommand } from './voiceCommands';
 
 const PRESETS: Record<string, Traits> = {
   savannah: { name: 'Savannah', accent: 'Southern Belle', species: 'human', skin: '#f1c27d', shirt: '#db2777', hair: 'longWaves', acc: 'none', beard: 'none', bg: 'sunset', lashes: true },
@@ -75,6 +76,26 @@ export default function App() {
       setScanning(false);
     }
   };
+const listenForCommand = () => {
+  const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  if (!SR) return alert('Try Chrome or Edge for live voice commands!');
+  const r = new SR();
+  r.lang = 'en-US';
+  setScanning(true);
+  setHeard('Listening for command... (e.g. "put a cowboy hat on him")');
+  r.onresult = (e: any) => {
+    const spoken = e.results.item(0).item(0).transcript;
+    const { updated, feedback } = parseVoiceCommand(spoken, char);
+    setChar(updated);
+    setHeard(feedback);
+    setScanning(false);
+  };
+  r.onerror = () => {
+    setScanning(false);
+    setHeard('Did not catch that command—try speaking again!');
+  };
+  r.start();
+};
 
   const toggleMic = async () => {
     if (mic) {
