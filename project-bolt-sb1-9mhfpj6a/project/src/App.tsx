@@ -13,7 +13,6 @@ const PRESETS: Record<string, Traits> = {
   zorgon: { name: 'Zorgon', accent: 'Cosmic Visitor', species: 'alien', skin: '#4ade80', shirt: '#7c3aed', hair: 'none', acc: 'none', beard: 'none', bg: 'neon', lashes: false },
 };
 
-
 export default function App() {
   const [is2D, setIs2D] = useState(true);
   const [rec, setRec] = useState(false);
@@ -41,26 +40,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!is2D) return;
     const c = canvasRef.current;
     if (!c) return;
     const ctx = c.getContext('2d');
     if (!ctx) return;
-
-    if (is2D) {
-      draw2DCharacter(ctx, c.width, c.height, char, vol, blink);
-    } else {
-      ctx.fillStyle = '#090d16';
-      ctx.fillRect(0, 0, c.width, c.height);
-      ctx.beginPath();
-      ctx.arc(c.width / 2, c.height / 2, 70 + vol * 20, 0, Math.PI * 2);
-      ctx.strokeStyle = '#6366f1';
-      ctx.lineWidth = 4;
-      ctx.stroke();
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '14px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('3D WebGL Mesh Next', c.width / 2, c.height / 2 + 120);
-    }
+    draw2DCharacter(ctx, c.width, c.height, char, vol, blink);
   }, [vol, is2D, blink, char]);
 
   const scanAccent = async () => {
@@ -76,27 +61,27 @@ export default function App() {
       setScanning(false);
     }
   };
-const listenForCommand = () => {
-  const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-  if (!SR) return alert('Try Chrome or Edge for live voice commands!');
-  const r = new SR();
-  r.lang = 'en-US';
-  setScanning(true);
-  setHeard('Listening for command... (e.g. "put a cowboy hat on him")');
-  r.onresult = (e: any) => {
-    const spoken = e.results.item(0).item(0).transcript;
-    const { updated, feedback } = parseVoiceCommand(spoken, char);
-    setChar(updated);
-    setHeard(feedback);
-    setScanning(false);
-  };
-  r.onerror = () => {
-    setScanning(false);
-    setHeard('Did not catch that command—try speaking again!');
-  };
-  r.start();
-};
 
+  const listenForCommand = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return alert('Try Chrome or Edge for live voice commands!');
+    const r = new SR();
+    r.lang = 'en-US';
+    setScanning(true);
+    setHeard('Listening for command... (e.g. "put a cowboy hat on him")');
+    r.onresult = (e: any) => {
+      const spoken = e.results.item(0).item(0).transcript;
+      const { updated, feedback } = parseVoiceCommand(spoken, char);
+      setChar(updated);
+      setHeard(feedback);
+      setScanning(false);
+    };
+    r.onerror = () => {
+      setScanning(false);
+      setHeard('Did not catch that command—try speaking again!');
+    };
+    r.start();
+  };
   const toggleMic = async () => {
     if (mic) {
       if (rec) stopRec();
@@ -179,19 +164,9 @@ const listenForCommand = () => {
             <button onClick={scanAccent} disabled={scanning} className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500">
               {scanning ? 'Listening...' : 'Scan Voice & Invent Character'}
             </button>
-                      <div className="space-y-2 pt-3 border-t border-slate-700">
-            <h2 className="text-xs font-bold uppercase text-indigo-400">2. AI Creature & Persona Builder</h2>
-            <button onClick={scanAccent} disabled={scanning} className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500">
-              {scanning ? 'Listening...' : 'Scan Voice & Invent Character'}
-            </button>
-            <button
-              onClick={listenForCommand}
-              disabled={scanning}
-              className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-500 text-white"
-            >
+            <button onClick={listenForCommand} disabled={scanning} className="w-full py-2 px-3 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-500 text-white">
               {scanning ? 'Listening...' : '🎙️ Voice Command (Edit by Voice)'}
             </button>
-
             {heard && <p className="text-xs text-slate-300 bg-slate-900 p-2 rounded">{heard}</p>}
             <div className="grid grid-cols-2 gap-1.5">
               {Object.entries(PRESETS).map(([k, p]) => (
@@ -219,13 +194,12 @@ const listenForCommand = () => {
                 <label className="text-slate-400 block mb-1">Hair / Hat</label>
                 <select value={char.hair} onChange={(e) => setChar({ ...char, hair: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
                   <option value="spiky">Spiky Hair</option>
-                  <option value="longWaves">Long Waves</option>
-                  <option value="ponytail">High Ponytail</option>
-                  <option value="buns">Twin Space Buns</option>
-
                   <option value="cowboyHat">Cowboy Hat</option>
                   <option value="beanie">Beanie</option>
                   <option value="bob">Classic Bob</option>
+                  <option value="longWaves">Long Waves</option>
+                  <option value="ponytail">High Ponytail</option>
+                  <option value="buns">Twin Space Buns</option>
                   <option value="none">None</option>
                 </select>
               </div>
@@ -247,13 +221,9 @@ const listenForCommand = () => {
                   <option value="greenscreen">Green Screen</option>
                 </select>
               </div>
-                            <div>
+              <div className="col-span-2">
                 <label className="text-slate-400 block mb-1">Facial Hair</label>
-                <select
-                  value={char.beard}
-                  onChange={(e) => setChar({ ...char, beard: e.target.value as any })}
-                  className="w-full bg-slate-900 border border-slate-700 rounded p-1.5"
-                >
+                <select value={char.beard} onChange={(e) => setChar({ ...char, beard: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
                   <option value="none">Clean Shaven</option>
                   <option value="stubble">5 O'Clock Shadow</option>
                   <option value="mustache">Mustache</option>
@@ -261,7 +231,6 @@ const listenForCommand = () => {
                   <option value="full">Full Jaw Beard</option>
                 </select>
               </div>
-
             </div>
             <div className="flex items-center justify-between pt-1">
               <span className="text-xs text-slate-400">Fur/Skin:</span>
@@ -269,13 +238,56 @@ const listenForCommand = () => {
                 {['#f1c27d', '#8d5524', '#f97316', '#4ade80', '#94a3b8', '#a855f7'].map((t) => (
                   <button key={t} onClick={() => setChar({ ...char, skin: t })} className={`w-4 h-4 rounded-full border ${char.skin === t ? 'border-white scale-110' : 'border-slate-600'}`} style={{ backgroundColor: t }} />
                 ))}
-              </div><button
-  onClick={() => setChar({ ...char, lashes: !char.lashes })}
-  className={`text-xs px-2 py-1 rounded border ${char.lashes ? 'bg-pink-600 border-pink-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-400'}`}
->
-  {char.lashes ? 'Lashes: ON' : 'Lashes: OFF'}
-</button>
-
+              </div>
+              <button onClick={() => setChar({ ...char, lashes: !char.lashes })} className={`text-xs px-2 py-1 rounded border ${char.lashes ? 'bg-pink-600 border-pink-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-400'}`}>
+                {char.lashes ? 'Lashes: ON' : 'Lashes: OFF'}
+              </button>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-700">
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Vocal Input</span><span>{(vol * 100).toFixed(0)}%</span>
+            </div>
+            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+              <div>
+                <label className="text-slate-400 block mb-1">Eyewear</label>
+                <select value={char.acc} onChange={(e) => setChar({ ...char, acc: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
+                  <option value="glasses">Glasses</option>
+                  <option value="sunglasses">Shades</option>
+                  <option value="monocle">Monocle</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-slate-400 block mb-1">Background</label>
+                <select value={char.bg} onChange={(e) => setChar({ ...char, bg: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
+                  <option value="dark">Dark Studio</option>
+                  <option value="neon">Cyber Neon</option>
+                  <option value="sunset">Warm Sunset</option>
+                  <option value="greenscreen">Green Screen</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="text-slate-400 block mb-1">Facial Hair</label>
+                <select value={char.beard} onChange={(e) => setChar({ ...char, beard: e.target.value as any })} className="w-full bg-slate-900 border border-slate-700 rounded p-1.5">
+                  <option value="none">Clean Shaven</option>
+                  <option value="stubble">5 O'Clock Shadow</option>
+                  <option value="mustache">Mustache</option>
+                  <option value="goatee">Sculpted Goatee</option>
+                  <option value="full">Full Jaw Beard</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs text-slate-400">Fur/Skin:</span>
+              <div className="flex gap-1">
+                {['#f1c27d', '#8d5524', '#f97316', '#4ade80', '#94a3b8', '#a855f7'].map((t) => (
+                  <button key={t} onClick={() => setChar({ ...char, skin: t })} className={`w-4 h-4 rounded-full border ${char.skin === t ? 'border-white scale-110' : 'border-slate-600'}`} style={{ backgroundColor: t }} />
+                ))}
+              </div>
+              <button onClick={() => setChar({ ...char, lashes: !char.lashes })} className={`text-xs px-2 py-1 rounded border ${char.lashes ? 'bg-pink-600 border-pink-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-400'}`}>
+                {char.lashes ? 'Lashes: ON' : 'Lashes: OFF'}
+              </button>
             </div>
           </div>
           <div className="pt-2 border-t border-slate-700">
@@ -293,11 +305,10 @@ const listenForCommand = () => {
           </span>
           {rec && <span className="absolute top-4 right-4 bg-rose-600 px-3 py-1 rounded text-xs font-bold animate-pulse">REC</span>}
           {is2D ? (
-  <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
-) : (
-  <Avatar3D vol={vol} char={char} blink={blink} canvasRef={canvasRef} />
-)}
-
+            <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
+          ) : (
+            <Avatar3D vol={vol} char={char} blink={blink} canvasRef={canvasRef} />
+          )}
         </div>
       </div>
     </div>
