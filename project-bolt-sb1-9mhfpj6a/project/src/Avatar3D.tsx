@@ -10,10 +10,11 @@ interface Avatar3DProps {
 }
 
 export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef }) => {
+  const localCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const volRef = useRef(vol);
   const blinkRef = useRef(blink);
   const charRef = useRef(char);
-  const rotRef = useRef({ x: 0, y: 0 });
+  const rotRef = useRef({ x: 0.08, y: -0.25 }); // Slight 3D angle on load so depth is immediately obvious!
   const draggingRef = useRef(false);
 
   useEffect(() => { volRef.current = vol; }, [vol]);
@@ -21,38 +22,43 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
   useEffect(() => { charRef.current = char; }, [char]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = localCanvasRef.current;
     if (!canvas) return;
+    if (canvasRef) (canvasRef as any).current = canvas;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-    camera.position.set(0, 0.1, 4.4);
+    camera.position.set(0, 0.1, 4.5);
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(400, 400);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // 3D Studio Three-Point Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.55);
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    keyLight.position.set(2.5, 3, 4);
-    const rimLight = new THREE.DirectionalLight(0x818cf8, 0.9);
-    rimLight.position.set(-3, 1, -2);
+    // Dramatic 3D Three-Point Studio Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+    keyLight.position.set(3, 3.5, 4);
+    const rimLight = new THREE.DirectionalLight(0x6366f1, 1.2);
+    rimLight.position.set(-3.5, 1.5, -2.5);
     scene.add(ambient, keyLight, rimLight);
 
-    // Master Head Group
+    // 3D Wireframe Studio Floor Grid (Gives instant 3D spatial depth!)
+    const grid = new THREE.GridHelper(6, 12, 0x4f46e5, 0x1e293b);
+    grid.position.y = -1.75;
+    scene.add(grid);
+
     const headGroup = new THREE.Group();
     scene.add(headGroup);
 
     // 1. Cranium Mesh
-    const skinMat = new THREE.MeshStandardMaterial({ color: char.skin, roughness: 0.45, metalness: 0.05 });
-    const craniumGeo = new THREE.SphereGeometry(0.95, 32, 32);
+    const skinMat = new THREE.MeshStandardMaterial({ color: char.skin, roughness: 0.4, metalness: 0.08 });
+    const craniumGeo = new THREE.SphereGeometry(0.95, 36, 36);
     craniumGeo.scale(0.92, 1.12, 0.96);
     const cranium = new THREE.Mesh(craniumGeo, skinMat);
     cranium.position.y = 0.2;
     headGroup.add(cranium);
 
-    // 2. Articulated 3D Jaw Group (Moves down with voice volume)
+    // 2. Articulated 3D Jaw Group
     const jawGroup = new THREE.Group();
     jawGroup.position.set(0, -0.15, 0.08);
     headGroup.add(jawGroup);
@@ -63,51 +69,72 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
     jawMesh.position.set(0, -0.35, 0.02);
     jawGroup.add(jawMesh);
 
-    // Lower Lip Mesh
-    const lipMat = new THREE.MeshStandardMaterial({ color: char.lashes ? 0xe11d48 : 0x9f4a4a, roughness: 0.3 });
-    const lowerLip = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.045, 12, 24, Math.PI), lipMat);
+    // 3D Beard / Goatee Mesh
+    const beardMat = new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.85 });
+    const beardGeo = new THREE.SphereGeometry(0.79, 28, 20, 0, Math.PI * 2, Math.PI * 0.45, Math.PI * 0.55);
+    beardGeo.scale(0.9, 0.95, 0.96);
+    const beardMesh = new THREE.Mesh(beardGeo, beardMat);
+    beardMesh.position.set(0, -0.34, 0.04);
+    jawGroup.add(beardMesh);
+
+    // Lower & Upper 3D Lips
+    const lipMat = new THREE.MeshStandardMaterial({ color: char.lashes ? 0xe11d48 : 0x9f4a4a, roughness: 0.25 });
+    const lowerLip = new THREE.Mesh(new THREE.TorusGeometry(0.21, 0.042, 12, 24, Math.PI), lipMat);
     lowerLip.rotation.x = Math.PI;
     lowerLip.position.set(0, -0.12, 0.72);
     jawGroup.add(lowerLip);
 
-    // Upper Lip & Nose
-    const upperLip = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.042, 12, 24, Math.PI), lipMat);
+    const upperLip = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.04, 12, 24, Math.PI), lipMat);
     upperLip.position.set(0, -0.16, 0.82);
     headGroup.add(upperLip);
 
-    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.35, 16), skinMat);
-    nose.position.set(0, 0.14, 0.94);
-    nose.rotation.x = 0.25;
+    // 3D Sculpted Nose
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.38, 18), skinMat);
+    nose.position.set(0, 0.14, 0.96);
+    nose.rotation.x = 0.28;
     headGroup.add(nose);
     // 3. 3D Eyes & Pupils
-    const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 });
-    const pupilMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 });
+    const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.12 });
+    const pupilMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.08 });
 
     const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.16, 20, 20), eyeWhiteMat);
     leftEye.position.set(-0.32, 0.34, 0.78);
     const leftPupil = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), pupilMat);
-    leftPupil.position.set(-0.32, 0.34, 0.91);
+    leftPupil.position.set(-0.32, 0.34, 0.92);
 
     const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.16, 20, 20), eyeWhiteMat);
     rightEye.position.set(0.32, 0.34, 0.78);
     const rightPupil = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), pupilMat);
-    rightPupil.position.set(0.32, 0.34, 0.91);
+    rightPupil.position.set(0.32, 0.34, 0.92);
 
     headGroup.add(leftEye, leftPupil, rightEye, rightPupil);
 
-    // 4. 3D Shoulders & Neck
-    const shirtMat = new THREE.MeshStandardMaterial({ color: char.shirt, roughness: 0.7 });
-    const shoulders = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 1.35, 0.9, 24), shirtMat);
+    // 4. 3D Ears / Animal Ears
+    const leftEar = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat);
+    leftEar.position.set(-0.92, 0.2, 0);
+    const rightEar = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat);
+    rightEar.position.set(0.92, 0.2, 0);
+    headGroup.add(leftEar, rightEar);
+
+    // 5. 3D Cowboy Hat / Crown Mesh
+    const hatMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+    const hatGroup = new THREE.Group();
+    const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.06, 32), hatMat);
+    const hatCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.78, 0.65, 32), hatMat);
+    hatCrown.position.y = 0.32;
+    hatGroup.add(hatBrim, hatCrown);
+    hatGroup.position.set(0, 0.95, 0);
+    headGroup.add(hatGroup);
+
+    // 6. 3D Shoulders & Neck
+    const shirtMat = new THREE.MeshStandardMaterial({ color: char.shirt, roughness: 0.65 });
+    const shoulders = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 1.38, 0.9, 28), shirtMat);
     shoulders.position.set(0, -1.35, -0.1);
     scene.add(shoulders);
 
     const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 0.65, 20), skinMat);
     neck.position.set(0, -0.78, -0.05);
     scene.add(neck);
-
-    // 5. Optional 3D Cowboy Hat / Beanie / Ears
-    const hatGroup = new THREE.Group();
-    headGroup.add(hatGroup);
 
     let animId: number;
     let clock = 0;
@@ -118,25 +145,36 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
       const b = blinkRef.current;
       const ch = charRef.current;
 
-      // Sync colors dynamically
       skinMat.color.set(ch.skin);
       shirtMat.color.set(ch.shirt);
       lipMat.color.set(ch.lashes ? 0xe11d48 : 0x9f4a4a);
 
-      // Update background color
+      // Show/Hide 3D Hat & Beard dynamically
+      hatGroup.visible = ch.hair === 'cowboyHat' || ch.hair === 'beanie';
+      hatMat.color.set(ch.hair === 'beanie' ? 0xdc2626 : 0x78350f);
+      beardMesh.visible = ch.beard !== 'none' && ch.beard !== undefined;
+
+      // Adjust Ear Position for Cat/Bear vs Human
+      if (ch.species === 'cat' || ch.species === 'bear') {
+        leftEar.position.set(-0.65, 1.05, 0);
+        rightEar.position.set(0.65, 1.05, 0);
+      } else {
+        leftEar.position.set(-0.92, 0.2, 0);
+        rightEar.position.set(0.92, 0.2, 0);
+      }
+
       if (ch.bg === 'greenscreen') scene.background = new THREE.Color(0x00b140);
       else if (ch.bg === 'neon') scene.background = new THREE.Color(0x1e1b4b);
       else if (ch.bg === 'sunset') scene.background = new THREE.Color(0x451a03);
       else scene.background = new THREE.Color(0x090d16);
 
-      // Animate 3D Jaw Drop & Head Sway
+      // Animate 3D Jaw & Head Angle
       jawGroup.position.y = -0.15 - v * 0.28;
-      jawGroup.rotation.x = v * 0.35;
+      jawGroup.rotation.x = v * 0.38;
 
-      headGroup.rotation.y = rotRef.current.y + Math.sin(clock) * 0.08;
-      headGroup.rotation.x = rotRef.current.x + Math.cos(clock * 0.8) * 0.04 - v * 0.08;
+      headGroup.rotation.y = rotRef.current.y + Math.sin(clock) * 0.12;
+      headGroup.rotation.x = rotRef.current.x + Math.cos(clock * 0.8) * 0.05 - v * 0.08;
 
-      // Blink scaling
       const eyeScaleY = b ? 0.08 : 1;
       leftEye.scale.y = eyeScaleY;
       rightEye.scale.y = eyeScaleY;
@@ -157,7 +195,7 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
   return (
     <div className="relative flex flex-col items-center">
       <canvas
-        ref={canvasRef}
+        ref={localCanvasRef}
         width={400}
         height={400}
         onMouseDown={() => (draggingRef.current = true)}
@@ -165,13 +203,13 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
         onMouseLeave={() => (draggingRef.current = false)}
         onMouseMove={(e) => {
           if (!draggingRef.current) return;
-          rotRef.current.y += e.movementX * 0.01;
-          rotRef.current.x += e.movementY * 0.01;
+          rotRef.current.y += e.movementX * 0.012;
+          rotRef.current.x += e.movementY * 0.012;
         }}
         className="rounded-lg border border-slate-800 max-w-full h-auto shadow-2xl cursor-grab active:cursor-grabbing"
       />
-      <span className="text-[11px] text-slate-400 mt-2 font-mono">
-        Drag on 3D head to rotate in real time
+      <span className="text-[11px] text-indigo-300 mt-2 font-mono">
+        3D WebGL Active • Drag head to rotate 360°
       </span>
     </div>
   );
