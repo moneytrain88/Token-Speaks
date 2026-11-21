@@ -159,86 +159,81 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
           ctx.moveTo(cx, cy - 16); ctx.lineTo(cx - 9, cy + 14); ctx.lineTo(cx + 9, cy + 14);
           ctx.closePath(); ctx.fill();
 
-                    // 7. Sculpted 3D Lips, Cupid's Bow, Teeth & Tongue
-          const openAmt = Math.min(v * 38, 32);
-          const mouthW = 32 - openAmt * 0.22; // Corners pull inward as jaw drops
+                   // 7. Slim, Refined 3D Lips, Teeth & Tongue
+          const openAmt = Math.min(v * 44, 34);
+          const mouthW = 28 - openAmt * 0.2;
           const mouthY = cy + 36 + jawDrop * 0.4;
-          const upperPeakY = mouthY - 4 - openAmt * 0.35;
-          const lowerLipY = mouthY + 4 + openAmt * 0.65;
+          const upperPeakY = mouthY - 2.5 - openAmt * 0.35;
+          const lowerLipY = mouthY + 2.5 + openAmt * 0.75;
 
-          // Inner Oral Cavity (when speaking)
-          if (openAmt > 1.5) {
-            ctx.fillStyle = '#2a040e';
+          // Inner Oral Cavity (Drawn first, wider contrast so speech reads clearly)
+          if (openAmt > 1.2) {
+            ctx.fillStyle = '#1f0209';
             ctx.beginPath();
-            ctx.moveTo(cx - mouthW + 3, mouthY);
-            ctx.quadraticCurveTo(cx, upperPeakY + 2, cx + mouthW - 3, mouthY);
-            ctx.quadraticCurveTo(cx, lowerLipY - 2, cx - mouthW + 3, mouthY);
+            ctx.moveTo(cx - mouthW + 2, mouthY);
+            ctx.quadraticCurveTo(cx, upperPeakY + 1, cx + mouthW - 2, mouthY);
+            ctx.quadraticCurveTo(cx, lowerLipY - 1, cx - mouthW + 2, mouthY);
             ctx.fill();
 
             // Upper Teeth Row
-            ctx.fillStyle = '#f1f5f9';
+            ctx.fillStyle = '#f8fafc';
             ctx.beginPath();
-            ctx.moveTo(cx - mouthW * 0.72, mouthY - openAmt * 0.1);
-            ctx.quadraticCurveTo(cx, upperPeakY + 3, cx + mouthW * 0.72, mouthY - openAmt * 0.1);
-            ctx.lineTo(cx + mouthW * 0.65, mouthY + Math.min(openAmt * 0.25, 6));
-            ctx.quadraticCurveTo(cx, mouthY + Math.min(openAmt * 0.28, 7), cx - mouthW * 0.65, mouthY + Math.min(openAmt * 0.25, 6));
+            ctx.moveTo(cx - mouthW * 0.7, mouthY - openAmt * 0.08);
+            ctx.quadraticCurveTo(cx, upperPeakY + 2, cx + mouthW * 0.7, mouthY - openAmt * 0.08);
+            ctx.lineTo(cx + mouthW * 0.62, mouthY + Math.min(openAmt * 0.28, 6.5));
+            ctx.quadraticCurveTo(cx, mouthY + Math.min(openAmt * 0.32, 7.5), cx - mouthW * 0.62, mouthY + Math.min(openAmt * 0.28, 6.5));
             ctx.closePath();
             ctx.fill();
 
             // Tongue Cushion
-            if (openAmt > 7) {
+            if (openAmt > 6) {
               ctx.fillStyle = '#be123c';
               ctx.beginPath();
-              ctx.ellipse(cx, lowerLipY - 5, mouthW * 0.52, openAmt * 0.28, 0, Math.PI, 0);
+              ctx.ellipse(cx, lowerLipY - 3.5, mouthW * 0.5, openAmt * 0.3, 0, Math.PI, 0);
               ctx.fill();
             }
           }
 
-          // Upper Lip (Cupid's Bow + Darker Overhead Shadow Plane)
-          const lipBase = ch.lashes ? '#be123c' : '#9f4a4a';
-          const lipHighlight = ch.lashes ? '#fb7185' : '#c97b7b';
+          // Slim Upper Lip with Subtle Cupid's Bow
+          const lipBase = ch.lashes ? '#be123c' : '#9e5858';
+          const lipHighlight = ch.lashes ? '#f43f5e' : '#bf7a7a';
 
           ctx.fillStyle = lipBase;
           ctx.beginPath();
           ctx.moveTo(cx - mouthW, mouthY);
-          // Left Cupid's Bow Peak
-          ctx.bezierCurveTo(cx - mouthW * 0.5, upperPeakY - 6, cx - 8, upperPeakY - 7, cx - 4, upperPeakY - 4);
-          // Center Philtrum Dip
-          ctx.lineTo(cx, upperPeakY - 2);
-          // Right Cupid's Bow Peak
-          ctx.lineTo(cx + 4, upperPeakY - 4);
-          ctx.bezierCurveTo(cx + 8, upperPeakY - 7, cx + mouthW * 0.5, upperPeakY - 6, cx + mouthW, mouthY);
-          // Inner Upper Lip Seam
-          ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.28, cx - mouthW, mouthY);
+          ctx.bezierCurveTo(cx - mouthW * 0.45, upperPeakY - 3.5, cx - 7, upperPeakY - 4, cx - 3.5, upperPeakY - 2);
+          ctx.lineTo(cx, upperPeakY - 0.8);
+          ctx.lineTo(cx + 3.5, upperPeakY - 2);
+          ctx.bezierCurveTo(cx + 7, upperPeakY - 4, cx + mouthW * 0.45, upperPeakY - 3.5, cx + mouthW, mouthY);
+          ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.32, cx - mouthW, mouthY);
           ctx.fill();
 
-          // Lower Lip (Rounded Cushion + Specular Studio Gloss)
-          const lowerGrad = ctx.createLinearGradient(cx, mouthY, cx, lowerLipY + 10);
+          // Slim Lower Lip Cushion
+          const lowerGrad = ctx.createLinearGradient(cx, mouthY, cx, lowerLipY + 6);
           lowerGrad.addColorStop(0, lipBase);
-          lowerGrad.addColorStop(0.5, lipHighlight);
-          lowerGrad.addColorStop(1, '#4c0519');
+          lowerGrad.addColorStop(0.55, lipHighlight);
+          lowerGrad.addColorStop(1, '#5e2626');
 
           ctx.fillStyle = lowerGrad;
           ctx.beginPath();
           ctx.moveTo(cx - mouthW, mouthY);
-          // Inner Lower Lip Seam
-          ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.55, cx + mouthW, mouthY);
-          // Outer Lower Lip Curve
-          ctx.bezierCurveTo(cx + mouthW * 0.7, lowerLipY + 11, cx - mouthW * 0.7, lowerLipY + 11, cx - mouthW, mouthY);
+          ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.68, cx + mouthW, mouthY);
+          ctx.bezierCurveTo(cx + mouthW * 0.65, lowerLipY + 6, cx - mouthW * 0.65, lowerLipY + 6, cx - mouthW, mouthY);
           ctx.fill();
 
-          // Specular Lip Gloss Highlight
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.32)';
+          // Subtle Specular Highlight
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
           ctx.beginPath();
-          ctx.ellipse(cx, lowerLipY + 2, mouthW * 0.42, 2.5, 0, 0, Math.PI * 2);
+          ctx.ellipse(cx, lowerLipY + 1, mouthW * 0.38, 1.5, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          // Subtle Chin Crease Shadow Below Lower Lip
-          ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-          ctx.lineWidth = 2.5;
+          // Soft Chin Crease
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.arc(cx, lowerLipY + 13, 14, 0.2 * Math.PI, 0.8 * Math.PI);
+          ctx.arc(cx, lowerLipY + 9, 12, 0.2 * Math.PI, 0.8 * Math.PI);
           ctx.stroke();
+
 
 
           if (ch.hair === 'cowboyHat') {
