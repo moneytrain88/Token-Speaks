@@ -6,7 +6,7 @@ export interface Traits {
   shirt: string;
   hair: 'none' | 'spiky' | 'bob' | 'cowboyHat' | 'beanie' | 'longWaves' | 'ponytail' | 'buns';
   acc: 'none' | 'glasses' | 'sunglasses' | 'monocle';
-  beard: 'none' | 'goatee' | 'full' | 'mustache';
+  beard: 'none' | 'stubble' | 'goatee' | 'full' | 'mustache';
   bg: 'dark' | 'neon' | 'sunset' | 'greenscreen';
   lashes?: boolean;
 }
@@ -42,7 +42,6 @@ export function draw2DCharacter(
   const cx = w / 2;
   const cy = h / 2 + 10;
 
-  // Back Hair Layer (Long Waves & Ponytail behind shoulders/head)
   if (char.hair === 'longWaves') {
     ctx.fillStyle = '#3b1d0e';
     ctx.beginPath();
@@ -55,7 +54,6 @@ export function draw2DCharacter(
     ctx.fill();
   }
 
-  // Shoulders & Neck
   ctx.fillStyle = char.shirt;
   ctx.beginPath();
   ctx.ellipse(cx, cy + 145, 115, 65, 0, Math.PI, 0);
@@ -64,17 +62,11 @@ export function draw2DCharacter(
   ctx.fillStyle = char.skin;
   ctx.fillRect(cx - 22, cy + 65, 44, 42);
 
-  // Species Ears
   if (char.species === 'cat') {
     ctx.fillStyle = char.skin;
     ctx.beginPath();
     ctx.moveTo(cx - 65, cy - 35); ctx.lineTo(cx - 75, cy - 115); ctx.lineTo(cx - 20, cy - 75);
     ctx.moveTo(cx + 65, cy - 35); ctx.lineTo(cx + 75, cy - 115); ctx.lineTo(cx + 20, cy - 75);
-    ctx.fill();
-    ctx.fillStyle = '#fb7185';
-    ctx.beginPath();
-    ctx.moveTo(cx - 58, cy - 45); ctx.lineTo(cx - 66, cy - 98); ctx.lineTo(cx - 28, cy - 72);
-    ctx.moveTo(cx + 58, cy - 45); ctx.lineTo(cx + 66, cy - 98); ctx.lineTo(cx + 28, cy - 72);
     ctx.fill();
   } else if (char.species === 'bear') {
     ctx.fillStyle = char.skin;
@@ -93,11 +85,6 @@ export function draw2DCharacter(
     ctx.moveTo(cx - 30, cy - 80); ctx.lineTo(cx - 55, cy - 120);
     ctx.moveTo(cx + 30, cy - 80); ctx.lineTo(cx + 55, cy - 120);
     ctx.stroke();
-    ctx.fillStyle = '#fef08a';
-    ctx.beginPath();
-    ctx.arc(cx - 55, cy - 122, 9, 0, Math.PI * 2);
-    ctx.arc(cx + 55, cy - 122, 9, 0, Math.PI * 2);
-    ctx.fill();
   } else if (char.species === 'human') {
     ctx.fillStyle = char.skin;
     ctx.beginPath();
@@ -106,7 +93,6 @@ export function draw2DCharacter(
     ctx.fill();
   }
 
-  // Head Base
   ctx.fillStyle = char.skin;
   ctx.beginPath();
   if (char.species === 'robot') ctx.roundRect(cx - 72, cy - 85, 144, 155, 16);
@@ -124,26 +110,12 @@ export function draw2DCharacter(
     ctx.beginPath(); ctx.moveTo(cx - 10, cy + 8); ctx.lineTo(cx + 10, cy + 8); ctx.lineTo(cx, cy + 20); ctx.fill();
   }
 
-  if (char.species === 'cat') {
-    ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - 35, cy + 16); ctx.lineTo(cx - 82, cy + 8);
-    ctx.moveTo(cx - 35, cy + 26); ctx.lineTo(cx - 82, cy + 30);
-    ctx.moveTo(cx + 35, cy + 16); ctx.lineTo(cx + 82, cy + 8);
-    ctx.moveTo(cx + 35, cy + 26); ctx.lineTo(cx + 82, cy + 30);
-    ctx.stroke();
-  }
-
   const eyeY = cy - 18;
-  // Eyelashes
   if (char.lashes && !blink) {
-    ctx.strokeStyle = '#0f172a';
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(cx - 42, eyeY - 6); ctx.lineTo(cx - 50, eyeY - 12);
-    ctx.moveTo(cx - 38, eyeY - 10); ctx.lineTo(cx - 44, eyeY - 17);
     ctx.moveTo(cx + 42, eyeY - 6); ctx.lineTo(cx + 50, eyeY - 12);
-    ctx.moveTo(cx + 38, eyeY - 10); ctx.lineTo(cx + 44, eyeY - 17);
     ctx.stroke();
   }
 
@@ -163,19 +135,11 @@ export function draw2DCharacter(
     ctx.ellipse(cx - 32, eyeY, 16, 24, -0.25, 0, Math.PI * 2);
     ctx.ellipse(cx + 32, eyeY, 16, 24, 0.25, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(cx - 36, eyeY - 8, 4, 0, Math.PI * 2); ctx.arc(cx + 28, eyeY - 8, 4, 0, Math.PI * 2);
-    ctx.fill();
   } else {
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(cx - 30, eyeY, 13, 0, Math.PI * 2); ctx.arc(cx + 30, eyeY, 13, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 30, eyeY, 13, 0, Math.PI * 2); ctx.arc(cx + 30, eyeY, 13, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = char.species === 'monster' ? '#dc2626' : '#0f172a';
-    ctx.beginPath();
-    ctx.arc(cx - 30, eyeY, 6, 0, Math.PI * 2); ctx.arc(cx + 30, eyeY, 6, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 30, eyeY, 6, 0, Math.PI * 2); ctx.arc(cx + 30, eyeY, 6, 0, Math.PI * 2); ctx.fill();
   }
 
   const lift = Math.min(vol * 14, 12);
@@ -185,17 +149,14 @@ export function draw2DCharacter(
   ctx.moveTo(cx + 15, eyeY - 25 - lift); ctx.lineTo(cx + 45, eyeY - 22 - lift);
   ctx.stroke();
 
-   // Dynamic jaw offset so facial hair moves as you speak
+  const mH = Math.max(2, vol * 38);
   const jawFlex = Math.min(mH * 0.45, 14);
   ctx.fillStyle = '#1e293b';
 
   if (char.beard === 'stubble') {
     ctx.fillStyle = 'rgba(30, 41, 59, 0.22)';
-    ctx.beginPath();
-    ctx.arc(cx, cy + 20 + jawFlex * 0.4, 62, 0.08 * Math.PI, 0.92 * Math.PI);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy + 20 + jawFlex * 0.4, 62, 0.08 * Math.PI, 0.92 * Math.PI); ctx.fill();
   } else if (char.beard === 'full') {
-    // Full Jaw-Hugging Beard + Mustache Bridge
     ctx.beginPath();
     ctx.moveTo(cx - 64, cy + 12);
     ctx.bezierCurveTo(cx - 66, cy + 68 + jawFlex, cx - 32, cy + 82 + jawFlex, cx, cy + 84 + jawFlex);
@@ -204,21 +165,10 @@ export function draw2DCharacter(
     ctx.quadraticCurveTo(cx, cy + 16, cx - 26, cy + 26);
     ctx.quadraticCurveTo(cx - 38, cy + 32, cx - 64, cy + 12);
     ctx.fill();
-    // Soul Patch
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + 48 + jawFlex * 0.7, 9, 7, 0, 0, Math.PI * 2);
-    ctx.fill();
   } else if (char.beard === 'goatee') {
-    // Sculpted Chin Goatee + Mustache Arch
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + 54 + jawFlex * 0.8, 22, 16, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(cx - 14, cy + 24, 15, 5, -0.18, 0, Math.PI * 2);
-    ctx.ellipse(cx + 14, cy + 24, 15, 5, 0.18, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, cy + 54 + jawFlex * 0.8, 22, 16, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx - 14, cy + 24, 15, 5, -0.18, 0, Math.PI * 2); ctx.ellipse(cx + 14, cy + 24, 15, 5, 0.18, 0, Math.PI * 2); ctx.fill();
   } else if (char.beard === 'mustache') {
-    // Tapered Handlebar Mustache
     ctx.beginPath();
     ctx.moveTo(cx, cy + 21);
     ctx.bezierCurveTo(cx - 12, cy + 16, cx - 28, cy + 20, cx - 34, cy + 28);
@@ -228,8 +178,6 @@ export function draw2DCharacter(
     ctx.fill();
   }
 
-
-   const mH = Math.max(2, vol * 38);
   if (char.species === 'robot') {
     ctx.fillStyle = '#0f172a'; ctx.fillRect(cx - 32, cy + 26, 64, 24);
     ctx.fillStyle = '#38bdf8';
@@ -245,7 +193,6 @@ export function draw2DCharacter(
     const upperPeakY = mouthY - (isFem2D ? 2.5 : 1.5) - openAmt * 0.32;
     const lowerLipY = mouthY + (isFem2D ? 2.5 : 1.8) + openAmt * 0.72;
 
-    // 1. Inner Oral Cavity, Upper Teeth & Tongue (when speaking)
     if (openAmt > 2.5) {
       ctx.fillStyle = '#4c0519';
       ctx.beginPath();
@@ -253,100 +200,33 @@ export function draw2DCharacter(
       ctx.quadraticCurveTo(cx, upperPeakY + 1, cx + mouthW - 2, mouthY);
       ctx.quadraticCurveTo(cx, lowerLipY - 1, cx - mouthW + 2, mouthY);
       ctx.fill();
-
-      // Crisp Cartoon Upper Teeth
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.moveTo(cx - mouthW * 0.68, mouthY - openAmt * 0.06);
-      ctx.quadraticCurveTo(cx, upperPeakY + 2, cx + mouthW * 0.68, mouthY - openAmt * 0.06);
-      ctx.lineTo(cx + mouthW * 0.6, mouthY + Math.min(openAmt * 0.26, 6));
-      ctx.quadraticCurveTo(cx, mouthY + Math.min(openAmt * 0.3, 7), cx - mouthW * 0.6, mouthY + Math.min(openAmt * 0.26, 6));
-      ctx.closePath();
+      ctx.ellipse(cx, mouthY + 1, mouthW * 0.55, Math.min(openAmt * 0.25, 5), 0, 0, Math.PI);
       ctx.fill();
-
-      // Cartoon Tongue
-      if (openAmt > 7) {
-        ctx.fillStyle = '#fb7185';
-        ctx.beginPath();
-        ctx.ellipse(cx, lowerLipY - 3, mouthW * 0.48, openAmt * 0.28, 0, Math.PI, 0);
-        ctx.fill();
-      }
     }
 
-    if (isFem2D) {
-      // FEMALE 2D: Cupid's Bow + Rose Lips + Cartoon Shine
-      ctx.fillStyle = '#e11d48';
-      ctx.beginPath();
-      ctx.moveTo(cx - mouthW, mouthY);
-      ctx.bezierCurveTo(cx - mouthW * 0.45, upperPeakY - 3.5, cx - 7, upperPeakY - 4, cx - 3.5, upperPeakY - 2);
-      ctx.lineTo(cx, upperPeakY - 0.8);
-      ctx.lineTo(cx + 3.5, upperPeakY - 2);
-      ctx.bezierCurveTo(cx + 7, upperPeakY - 4, cx + mouthW * 0.45, upperPeakY - 3.5, cx + mouthW, mouthY);
-      ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.3, cx - mouthW, mouthY);
-      ctx.fill();
-
-      ctx.fillStyle = '#fb7185';
-      ctx.beginPath();
-      ctx.moveTo(cx - mouthW, mouthY);
-      ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.65, cx + mouthW, mouthY);
-      ctx.bezierCurveTo(cx + mouthW * 0.65, lowerLipY + 5.5, cx - mouthW * 0.65, lowerLipY + 5.5, cx - mouthW, mouthY);
-      ctx.fill();
-
-      // Cartoon Lip Shine
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.beginPath();
-      ctx.ellipse(cx, lowerLipY + 1, mouthW * 0.35, 1.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      // MALE 2D: Broader Natural Mouth Line, Corner Creases & Subtle Lower Lip
-      ctx.fillStyle = 'rgba(100, 45, 40, 0.45)';
-      ctx.beginPath();
-      ctx.moveTo(cx - mouthW, mouthY);
-      ctx.quadraticCurveTo(cx, upperPeakY - 2, cx + mouthW, mouthY);
-      ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.3, cx - mouthW, mouthY);
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(130, 60, 52, 0.35)';
-      ctx.beginPath();
-      ctx.moveTo(cx - mouthW * 0.82, mouthY);
-      ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.65, cx + mouthW * 0.82, mouthY);
-      ctx.quadraticCurveTo(cx, lowerLipY + 4, cx - mouthW * 0.82, mouthY);
-      ctx.fill();
-
-      // Cartoon Corner Lines & Chin Accent
-      ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.moveTo(cx - mouthW - 2, mouthY + 1); ctx.lineTo(cx - mouthW + 3, mouthY);
-      ctx.moveTo(cx + mouthW + 2, mouthY + 1); ctx.lineTo(cx + mouthW - 3, mouthY);
-      ctx.stroke();
-    }
-
-    // Subtle Chin Line
-    ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
-    ctx.lineWidth = 2;
+    ctx.fillStyle = isFem2D ? '#e11d48' : 'rgba(100, 45, 40, 0.45)';
     ctx.beginPath();
-    ctx.arc(cx, lowerLipY + 8, isFem2D ? 10 : 14, 0.25 * Math.PI, 0.75 * Math.PI);
-    ctx.stroke();
-  }
+    ctx.moveTo(cx - mouthW, mouthY);
+    ctx.quadraticCurveTo(cx, upperPeakY - 2.5, cx + mouthW, mouthY);
+    ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.3, cx - mouthW, mouthY);
+    ctx.fill();
 
-
-  if (char.beard === 'mustache') {
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = isFem2D ? '#fb7185' : 'rgba(130, 60, 52, 0.35)';
     ctx.beginPath();
-    ctx.ellipse(cx - 14, cy + 23, 16, 6, -0.2, 0, Math.PI * 2);
-    ctx.ellipse(cx + 14, cy + 23, 16, 6, 0.2, 0, Math.PI * 2);
+    ctx.moveTo(cx - mouthW * 0.85, mouthY);
+    ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.65, cx + mouthW * 0.85, mouthY);
+    ctx.quadraticCurveTo(cx, lowerLipY + 4.5, cx - mouthW * 0.85, mouthY);
     ctx.fill();
   }
 
-  // Front Hair & Hats
   ctx.fillStyle = '#3b1d0e';
   if (char.hair === 'spiky') {
     ctx.fillStyle = '#1e293b';
     ctx.beginPath();
     ctx.moveTo(cx - 65, cy - 45); ctx.lineTo(cx - 50, cy - 110); ctx.lineTo(cx - 20, cy - 85);
-    ctx.lineTo(cx, cy - 120); ctx.lineTo(cx + 25, cy - 85); ctx.lineTo(cx + 55, cy - 110);
-    ctx.lineTo(cx + 65, cy - 45); ctx.fill();
+    ctx.lineTo(cx, cy - 120); ctx.lineTo(cx + 25, cy - 85); ctx.lineTo(cx + 55, cy - 110); ctx.lineTo(cx + 65, cy - 45); ctx.fill();
   } else if (char.hair === 'cowboyHat') {
     ctx.fillStyle = '#78350f';
     ctx.beginPath(); ctx.ellipse(cx, cy - 70, 115, 22, 0, 0, Math.PI * 2); ctx.fill();
@@ -361,11 +241,7 @@ export function draw2DCharacter(
   } else if (char.hair === 'ponytail') {
     ctx.beginPath(); ctx.arc(cx, cy - 45, 70, Math.PI, 0); ctx.fill();
   } else if (char.hair === 'buns') {
-    ctx.beginPath();
-    ctx.arc(cx - 56, cy - 82, 26, 0, Math.PI * 2);
-    ctx.arc(cx + 56, cy - 82, 26, 0, Math.PI * 2);
-    ctx.arc(cx, cy - 45, 70, Math.PI, 0);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 56, cy - 82, 26, 0, Math.PI * 2); ctx.arc(cx + 56, cy - 82, 26, 0, Math.PI * 2); ctx.arc(cx, cy - 45, 70, Math.PI, 0); ctx.fill();
   }
 
   if (char.acc === 'glasses') {
@@ -374,8 +250,7 @@ export function draw2DCharacter(
     ctx.beginPath(); ctx.moveTo(cx - 10, eyeY); ctx.lineTo(cx + 10, eyeY); ctx.stroke();
   } else if (char.acc === 'sunglasses') {
     ctx.fillStyle = '#020617';
-    ctx.fillRect(cx - 52, eyeY - 16, 44, 30); ctx.fillRect(cx + 8, eyeY - 16, 44, 30);
-    ctx.fillRect(cx - 10, eyeY - 6, 20, 6);
+    ctx.fillRect(cx - 52, eyeY - 16, 44, 30); ctx.fillRect(cx + 8, eyeY - 16, 44, 30); ctx.fillRect(cx - 10, eyeY - 6, 20, 6);
   } else if (char.acc === 'monocle') {
     ctx.strokeStyle = '#eab308'; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.arc(cx + 30, eyeY, 18, 0, Math.PI * 2); ctx.stroke();
