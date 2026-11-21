@@ -159,14 +159,15 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
           ctx.moveTo(cx, cy - 16); ctx.lineTo(cx - 9, cy + 14); ctx.lineTo(cx + 9, cy + 14);
           ctx.closePath(); ctx.fill();
 
-                   // 7. Slim, Refined 3D Lips, Teeth & Tongue
+                   // 7. Distinct Male vs. Female 3D Lips, Teeth & Tongue
+          const isFemLook = Boolean(ch.lashes);
           const openAmt = Math.min(v * 44, 34);
-          const mouthW = 28 - openAmt * 0.2;
+          const mouthW = (isFemLook ? 27 : 31) - openAmt * 0.2;
           const mouthY = cy + 36 + jawDrop * 0.4;
-          const upperPeakY = mouthY - 2.5 - openAmt * 0.35;
-          const lowerLipY = mouthY + 2.5 + openAmt * 0.75;
+          const upperPeakY = mouthY - (isFemLook ? 2.5 : 1.5) - openAmt * 0.35;
+          const lowerLipY = mouthY + (isFemLook ? 2.5 : 1.8) + openAmt * 0.75;
 
-          // Inner Oral Cavity (Drawn first, wider contrast so speech reads clearly)
+          // Inner Oral Cavity
           if (openAmt > 1.2) {
             ctx.fillStyle = '#1f0209';
             ctx.beginPath();
@@ -194,44 +195,66 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             }
           }
 
-          // Slim Upper Lip with Subtle Cupid's Bow
-          const lipBase = ch.lashes ? '#be123c' : '#9e5858';
-          const lipHighlight = ch.lashes ? '#f43f5e' : '#bf7a7a';
+          if (isFemLook) {
+            // FEMALE: Sculpted Cupid's Bow + Rose Lip Shading + Gloss
+            ctx.fillStyle = '#be123c';
+            ctx.beginPath();
+            ctx.moveTo(cx - mouthW, mouthY);
+            ctx.bezierCurveTo(cx - mouthW * 0.45, upperPeakY - 3.5, cx - 7, upperPeakY - 4, cx - 3.5, upperPeakY - 2);
+            ctx.lineTo(cx, upperPeakY - 0.8);
+            ctx.lineTo(cx + 3.5, upperPeakY - 2);
+            ctx.bezierCurveTo(cx + 7, upperPeakY - 4, cx + mouthW * 0.45, upperPeakY - 3.5, cx + mouthW, mouthY);
+            ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.32, cx - mouthW, mouthY);
+            ctx.fill();
 
-          ctx.fillStyle = lipBase;
+            const lowerGrad = ctx.createLinearGradient(cx, mouthY, cx, lowerLipY + 6);
+            lowerGrad.addColorStop(0, '#be123c');
+            lowerGrad.addColorStop(0.55, '#f43f5e');
+            lowerGrad.addColorStop(1, '#5e2626');
+            ctx.fillStyle = lowerGrad;
+            ctx.beginPath();
+            ctx.moveTo(cx - mouthW, mouthY);
+            ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.68, cx + mouthW, mouthY);
+            ctx.bezierCurveTo(cx + mouthW * 0.65, lowerLipY + 6, cx - mouthW * 0.65, lowerLipY + 6, cx - mouthW, mouthY);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+            ctx.beginPath();
+            ctx.ellipse(cx, lowerLipY + 1, mouthW * 0.38, 1.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            // MALE: Natural Skin-Blended Upper Line, Broader Corner Creases & Subtle Lower Cushion
+            ctx.fillStyle = 'rgba(85, 40, 35, 0.42)';
+            ctx.beginPath();
+            ctx.moveTo(cx - mouthW, mouthY);
+            ctx.quadraticCurveTo(cx, upperPeakY - 2.2, cx + mouthW, mouthY);
+            ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.32, cx - mouthW, mouthY);
+            ctx.fill();
+
+            // Crisp Mouth Corner Lines
+            ctx.strokeStyle = 'rgba(45, 20, 18, 0.55)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx - mouthW - 2, mouthY + 0.5);
+            ctx.lineTo(cx - mouthW + 4, mouthY);
+            ctx.moveTo(cx + mouthW + 2, mouthY + 0.5);
+            ctx.lineTo(cx + mouthW - 4, mouthY);
+            ctx.stroke();
+
+            // Subtle Natural Lower Lip Tone
+            ctx.fillStyle = 'rgba(110, 55, 48, 0.32)';
+            ctx.beginPath();
+            ctx.moveTo(cx - mouthW * 0.85, mouthY);
+            ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.68, cx + mouthW * 0.85, mouthY);
+            ctx.quadraticCurveTo(cx, lowerLipY + 4.5, cx - mouthW * 0.85, mouthY);
+            ctx.fill();
+          }
+
+          // Chin Crease Shadow (Stronger & flatter on male jaw)
+          ctx.strokeStyle = isFemLook ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.32)';
+          ctx.lineWidth = isFemLook ? 2 : 2.5;
           ctx.beginPath();
-          ctx.moveTo(cx - mouthW, mouthY);
-          ctx.bezierCurveTo(cx - mouthW * 0.45, upperPeakY - 3.5, cx - 7, upperPeakY - 4, cx - 3.5, upperPeakY - 2);
-          ctx.lineTo(cx, upperPeakY - 0.8);
-          ctx.lineTo(cx + 3.5, upperPeakY - 2);
-          ctx.bezierCurveTo(cx + 7, upperPeakY - 4, cx + mouthW * 0.45, upperPeakY - 3.5, cx + mouthW, mouthY);
-          ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.32, cx - mouthW, mouthY);
-          ctx.fill();
-
-          // Slim Lower Lip Cushion
-          const lowerGrad = ctx.createLinearGradient(cx, mouthY, cx, lowerLipY + 6);
-          lowerGrad.addColorStop(0, lipBase);
-          lowerGrad.addColorStop(0.55, lipHighlight);
-          lowerGrad.addColorStop(1, '#5e2626');
-
-          ctx.fillStyle = lowerGrad;
-          ctx.beginPath();
-          ctx.moveTo(cx - mouthW, mouthY);
-          ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.68, cx + mouthW, mouthY);
-          ctx.bezierCurveTo(cx + mouthW * 0.65, lowerLipY + 6, cx - mouthW * 0.65, lowerLipY + 6, cx - mouthW, mouthY);
-          ctx.fill();
-
-          // Subtle Specular Highlight
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-          ctx.beginPath();
-          ctx.ellipse(cx, lowerLipY + 1, mouthW * 0.38, 1.5, 0, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Soft Chin Crease
-          ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(cx, lowerLipY + 9, 12, 0.2 * Math.PI, 0.8 * Math.PI);
+          ctx.arc(cx, lowerLipY + 8, isFemLook ? 11 : 15, 0.22 * Math.PI, 0.78 * Math.PI);
           ctx.stroke();
 
 
