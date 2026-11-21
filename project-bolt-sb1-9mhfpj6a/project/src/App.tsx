@@ -320,11 +320,14 @@ const [mouthOffset, setMouthOffset] = useState(0);
             {is2D ? '2D Creature Rig' : '3D WebGL Mesh'}
           </span>
           {rec && <span className="absolute top-4 right-4 bg-rose-600 px-3 py-1 rounded text-xs font-bold animate-pulse">REC</span>}
-          {is2D ? (
+                    {aiImageUrl ? (
+            <CustomPuppet imageUrl={aiImageUrl} promptText={customPrompt} vol={vol} mouthYOffset={mouthOffset} isFem={Boolean(char.lashes)} canvasRef={canvasRef} />
+          ) : is2D ? (
             <canvas ref={canvasRef} width={400} height={400} className="rounded-lg border border-slate-800 max-w-full h-auto" />
           ) : (
             <Avatar3D vol={vol} char={char} blink={blink} canvasRef={canvasRef} />
           )}
+
         </div>
       </div>
     </div>
