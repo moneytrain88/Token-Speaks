@@ -213,6 +213,21 @@ export default function App() {
                   <option value="greenscreen">Green Screen</option>
                 </select>
               </div>
+                            <div>
+                <label className="text-slate-400 block mb-1">Facial Hair</label>
+                <select
+                  value={char.beard}
+                  onChange={(e) => setChar({ ...char, beard: e.target.value as any })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded p-1.5"
+                >
+                  <option value="none">Clean Shaven</option>
+                  <option value="stubble">5 O'Clock Shadow</option>
+                  <option value="mustache">Mustache</option>
+                  <option value="goatee">Sculpted Goatee</option>
+                  <option value="full">Full Jaw Beard</option>
+                </select>
+              </div>
+
             </div>
             <div className="flex items-center justify-between pt-1">
               <span className="text-xs text-slate-400">Fur/Skin:</span>
