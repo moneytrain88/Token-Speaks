@@ -3,29 +3,26 @@ import * as THREE from 'three';
 import { Traits } from './CharacterRenderer';
 
 interface Avatar3DProps {
-  const promptRef = useRef(customPrompt || '');
-useEffect(() => { promptRef.current = customPrompt || ''; }, [customPrompt]);
-
   vol: number;
   char: Traits;
   blink: boolean;
+  customPrompt?: string;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
 }
 
-export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef }) => {
+export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, customPrompt, canvasRef }) => {
   const localCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const volRef = useRef(vol);
   const blinkRef = useRef(blink);
   const charRef = useRef(char);
   const promptRef = useRef(customPrompt || '');
-useEffect(() => { promptRef.current = customPrompt || ''; }, [customPrompt]);
-
-  const rotRef = useRef({ x: 0.08, y: -0.25 }); // Slight 3D angle on load so depth is immediately obvious!
+  const rotRef = useRef({ x: 0.08, y: -0.25 });
   const draggingRef = useRef(false);
 
   useEffect(() => { volRef.current = vol; }, [vol]);
   useEffect(() => { blinkRef.current = blink; }, [blink]);
   useEffect(() => { charRef.current = char; }, [char]);
+  useEffect(() => { promptRef.current = customPrompt || ''; }, [customPrompt]);
 
   useEffect(() => {
     const canvas = localCanvasRef.current;
