@@ -60,16 +60,25 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
           const cx = c.width / 2 + swayX;
           const cy = c.height / 2 + 10 + tiltY;
 
+          // Back Hair Layer (Long Waves & Ponytail)
+          const hairGrad = ctx.createLinearGradient(cx - 80, cy - 100, cx + 80, cy + 160);
+          hairGrad.addColorStop(0, '#451a03');
+          hairGrad.addColorStop(0.5, '#291002');
+          hairGrad.addColorStop(1, '#090d16');
+
           if (ch.hair === 'longWaves') {
-            const hGrad = ctx.createLinearGradient(cx - 80, cy, cx + 80, cy + 160);
-            hGrad.addColorStop(0, '#451a03');
-            hGrad.addColorStop(1, '#090d16');
-            ctx.fillStyle = hGrad;
+            ctx.fillStyle = hairGrad;
             ctx.beginPath();
             ctx.roundRect(cx - 84, cy - 65, 168, 195, 55);
             ctx.fill();
+          } else if (ch.hair === 'ponytail') {
+            ctx.fillStyle = hairGrad;
+            ctx.beginPath();
+            ctx.ellipse(cx + 58, cy - 55, 26, 65, 0.35, 0, Math.PI * 2);
+            ctx.fill();
           }
 
+          // Shoulders & Neck
           const bodyGrad = ctx.createLinearGradient(cx - 110, cy + 80, cx + 110, cy + 200);
           bodyGrad.addColorStop(0, ch.shirt);
           bodyGrad.addColorStop(1, '#020617');
@@ -85,6 +94,7 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
           ctx.fillStyle = neckGrad;
           ctx.fillRect(cx - 26, cy + 60, 52, 50);
 
+          // Species Ears
           if (ch.species === 'cat') {
             ctx.fillStyle = ch.skin;
             ctx.beginPath();
@@ -109,6 +119,8 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             ctx.moveTo(cx + 30, cy - 80); ctx.lineTo(cx + 55, cy - 120);
             ctx.stroke();
           }
+
+          // 3D Sculpted Cranium & Jaw
           const jawDrop = v * 16;
           const headGrad = ctx.createRadialGradient(cx - 22, cy - 35, 15, cx, cy, 118);
           headGrad.addColorStop(0, '#ffffff');
@@ -127,8 +139,16 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             ctx.bezierCurveTo(cx - 42, cy + 78 + jawDrop, cx - 66, cy + 35, cx - 68, cy - 30);
           }
           ctx.fill();
-
           const eyeY = cy - 18;
+          // 3D Eyelashes
+          if (ch.lashes && !b && ch.species !== 'robot') {
+            ctx.strokeStyle = '#090d16'; ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.moveTo(cx - 43, eyeY - 5); ctx.lineTo(cx - 51, eyeY - 11);
+            ctx.moveTo(cx + 43, eyeY - 5); ctx.lineTo(cx + 51, eyeY - 11);
+            ctx.stroke();
+          }
+
           if (ch.species === 'robot') {
             ctx.fillStyle = '#020617'; ctx.fillRect(cx - 52, eyeY - 14, 104, 28);
             ctx.fillStyle = '#22d3ee';
@@ -154,12 +174,49 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             });
           }
 
+          // Sculpted 3D Nose
           ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
           ctx.beginPath();
           ctx.moveTo(cx, cy - 16); ctx.lineTo(cx - 9, cy + 14); ctx.lineTo(cx + 9, cy + 14);
           ctx.closePath(); ctx.fill();
 
-                   // 7. Distinct Male vs. Female 3D Lips, Teeth & Tongue
+          // 3D Sculpted Facial Hair (Tracks Jaw Drop)
+          if (ch.beard && ch.beard !== 'none') {
+            const beardGrad = ctx.createLinearGradient(cx - 60, cy + 15, cx + 60, cy + 85 + jawDrop);
+            beardGrad.addColorStop(0, '#0f172a');
+            beardGrad.addColorStop(0.5, '#292524');
+            beardGrad.addColorStop(1, '#090d16');
+
+            if (ch.beard === 'stubble') {
+              ctx.fillStyle = 'rgba(20, 20, 25, 0.24)';
+              ctx.beginPath(); ctx.arc(cx, cy + 22 + jawDrop * 0.4, 62, 0.08 * Math.PI, 0.92 * Math.PI); ctx.fill();
+            } else if (ch.beard === 'full') {
+              ctx.fillStyle = beardGrad;
+              ctx.beginPath();
+              ctx.moveTo(cx - 65, cy + 10);
+              ctx.bezierCurveTo(cx - 66, cy + 68 + jawDrop, cx - 34, cy + 82 + jawDrop, cx, cy + 85 + jawDrop);
+              ctx.bezierCurveTo(cx + 34, cy + 82 + jawDrop, cx + 66, cy + 68 + jawDrop, cx + 65, cy + 10);
+              ctx.quadraticCurveTo(cx + 36, cy + 30, cx + 25, cy + 24);
+              ctx.quadraticCurveTo(cx, cy + 15, cx - 25, cy + 24);
+              ctx.quadraticCurveTo(cx - 36, cy + 30, cx - 65, cy + 10);
+              ctx.fill();
+            } else if (ch.beard === 'goatee') {
+              ctx.fillStyle = beardGrad;
+              ctx.beginPath(); ctx.ellipse(cx, cy + 54 + jawDrop * 0.85, 22, 16, 0, 0, Math.PI * 2); ctx.fill();
+              ctx.beginPath(); ctx.ellipse(cx - 14, cy + 24, 15, 5, -0.18, 0, Math.PI * 2); ctx.ellipse(cx + 14, cy + 24, 15, 5, 0.18, 0, Math.PI * 2); ctx.fill();
+            } else if (ch.beard === 'mustache') {
+              ctx.fillStyle = beardGrad;
+              ctx.beginPath();
+              ctx.moveTo(cx, cy + 21);
+              ctx.bezierCurveTo(cx - 12, cy + 16, cx - 28, cy + 20, cx - 34, cy + 28);
+              ctx.bezierCurveTo(cx - 24, cy + 30, cx - 10, cy + 27, cx, cy + 25);
+              ctx.bezierCurveTo(cx + 10, cy + 27, cx + 24, cy + 30, cx + 34, cy + 28);
+              ctx.bezierCurveTo(cx + 28, cy + 20, cx + 12, cy + 16, cx, cy + 21);
+              ctx.fill();
+            }
+          }
+
+          // Gender-Aware 3D Lips, Teeth & Tongue
           const isFemLook = Boolean(ch.lashes);
           const openAmt = Math.min(v * 44, 34);
           const mouthW = (isFemLook ? 27 : 31) - openAmt * 0.2;
@@ -167,7 +224,6 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
           const upperPeakY = mouthY - (isFemLook ? 2.5 : 1.5) - openAmt * 0.35;
           const lowerLipY = mouthY + (isFemLook ? 2.5 : 1.8) + openAmt * 0.75;
 
-          // Inner Oral Cavity
           if (openAmt > 1.2) {
             ctx.fillStyle = '#1f0209';
             ctx.beginPath();
@@ -176,27 +232,13 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             ctx.quadraticCurveTo(cx, lowerLipY - 1, cx - mouthW + 2, mouthY);
             ctx.fill();
 
-            // Upper Teeth Row
             ctx.fillStyle = '#f8fafc';
             ctx.beginPath();
-            ctx.moveTo(cx - mouthW * 0.7, mouthY - openAmt * 0.08);
-            ctx.quadraticCurveTo(cx, upperPeakY + 2, cx + mouthW * 0.7, mouthY - openAmt * 0.08);
-            ctx.lineTo(cx + mouthW * 0.62, mouthY + Math.min(openAmt * 0.28, 6.5));
-            ctx.quadraticCurveTo(cx, mouthY + Math.min(openAmt * 0.32, 7.5), cx - mouthW * 0.62, mouthY + Math.min(openAmt * 0.28, 6.5));
-            ctx.closePath();
+            ctx.ellipse(cx, mouthY + 1, mouthW * 0.55, Math.min(openAmt * 0.25, 5.5), 0, 0, Math.PI);
             ctx.fill();
-
-            // Tongue Cushion
-            if (openAmt > 6) {
-              ctx.fillStyle = '#be123c';
-              ctx.beginPath();
-              ctx.ellipse(cx, lowerLipY - 3.5, mouthW * 0.5, openAmt * 0.3, 0, Math.PI, 0);
-              ctx.fill();
-            }
           }
 
           if (isFemLook) {
-            // FEMALE: Sculpted Cupid's Bow + Rose Lip Shading + Gloss
             ctx.fillStyle = '#be123c';
             ctx.beginPath();
             ctx.moveTo(cx - mouthW, mouthY);
@@ -207,23 +249,13 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.32, cx - mouthW, mouthY);
             ctx.fill();
 
-            const lowerGrad = ctx.createLinearGradient(cx, mouthY, cx, lowerLipY + 6);
-            lowerGrad.addColorStop(0, '#be123c');
-            lowerGrad.addColorStop(0.55, '#f43f5e');
-            lowerGrad.addColorStop(1, '#5e2626');
-            ctx.fillStyle = lowerGrad;
+            ctx.fillStyle = '#f43f5e';
             ctx.beginPath();
             ctx.moveTo(cx - mouthW, mouthY);
             ctx.quadraticCurveTo(cx, mouthY + openAmt * 0.68, cx + mouthW, mouthY);
             ctx.bezierCurveTo(cx + mouthW * 0.65, lowerLipY + 6, cx - mouthW * 0.65, lowerLipY + 6, cx - mouthW, mouthY);
             ctx.fill();
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
-            ctx.beginPath();
-            ctx.ellipse(cx, lowerLipY + 1, mouthW * 0.38, 1.5, 0, 0, Math.PI * 2);
-            ctx.fill();
           } else {
-            // MALE: Natural Skin-Blended Upper Line, Broader Corner Creases & Subtle Lower Cushion
             ctx.fillStyle = 'rgba(85, 40, 35, 0.42)';
             ctx.beginPath();
             ctx.moveTo(cx - mouthW, mouthY);
@@ -231,17 +263,6 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             ctx.quadraticCurveTo(cx, mouthY - openAmt * 0.32, cx - mouthW, mouthY);
             ctx.fill();
 
-            // Crisp Mouth Corner Lines
-            ctx.strokeStyle = 'rgba(45, 20, 18, 0.55)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(cx - mouthW - 2, mouthY + 0.5);
-            ctx.lineTo(cx - mouthW + 4, mouthY);
-            ctx.moveTo(cx + mouthW + 2, mouthY + 0.5);
-            ctx.lineTo(cx + mouthW - 4, mouthY);
-            ctx.stroke();
-
-            // Subtle Natural Lower Lip Tone
             ctx.fillStyle = 'rgba(110, 55, 48, 0.32)';
             ctx.beginPath();
             ctx.moveTo(cx - mouthW * 0.85, mouthY);
@@ -250,22 +271,44 @@ export const Avatar3D: React.FC<Avatar3DProps> = ({ vol, char, blink, canvasRef 
             ctx.fill();
           }
 
-          // Chin Crease Shadow (Stronger & flatter on male jaw)
-          ctx.strokeStyle = isFemLook ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.32)';
-          ctx.lineWidth = isFemLook ? 2 : 2.5;
-          ctx.beginPath();
-          ctx.arc(cx, lowerLipY + 8, isFemLook ? 11 : 15, 0.22 * Math.PI, 0.78 * Math.PI);
-          ctx.stroke();
-
-
-
-          if (ch.hair === 'cowboyHat') {
+          // 3D Front Hair & Hats
+          ctx.fillStyle = '#291002';
+          if (ch.hair === 'spiky') {
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.moveTo(cx - 65, cy - 45); ctx.lineTo(cx - 50, cy - 110); ctx.lineTo(cx - 20, cy - 85);
+            ctx.lineTo(cx, cy - 120); ctx.lineTo(cx + 25, cy - 85); ctx.lineTo(cx + 55, cy - 110);
+            ctx.lineTo(cx + 65, cy - 45); ctx.fill();
+          } else if (ch.hair === 'cowboyHat') {
             ctx.fillStyle = '#78350f';
             ctx.beginPath(); ctx.ellipse(cx, cy - 70, 115, 22, 0, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.roundRect(cx - 55, cy - 125, 110, 60, 20); ctx.fill();
           } else if (ch.hair === 'beanie') {
             ctx.fillStyle = '#dc2626';
             ctx.beginPath(); ctx.arc(cx, cy - 55, 68, Math.PI, 0); ctx.fill();
+          } else if (ch.hair === 'bob' || ch.hair === 'longWaves') {
+            ctx.beginPath(); ctx.arc(cx, cy - 42, 72, Math.PI, 0);
+            ctx.fillRect(cx - 72, cy - 42, 18, 75); ctx.fillRect(cx + 54, cy - 42, 18, 75); ctx.fill();
+          } else if (ch.hair === 'ponytail') {
+            ctx.beginPath(); ctx.arc(cx, cy - 45, 70, Math.PI, 0); ctx.fill();
+          } else if (ch.hair === 'buns') {
+            ctx.beginPath(); ctx.arc(cx - 56, cy - 82, 26, 0, Math.PI * 2); ctx.arc(cx + 56, cy - 82, 26, 0, Math.PI * 2); ctx.arc(cx, cy - 45, 70, Math.PI, 0); ctx.fill();
+          }
+
+          // 3D Eyewear
+          if (ch.acc === 'glasses') {
+            ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 4;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+            ctx.fillRect(cx - 50, eyeY - 16, 40, 32); ctx.strokeRect(cx - 50, eyeY - 16, 40, 32);
+            ctx.fillRect(cx + 10, eyeY - 16, 40, 32); ctx.strokeRect(cx + 10, eyeY - 16, 40, 32);
+            ctx.beginPath(); ctx.moveTo(cx - 10, eyeY); ctx.lineTo(cx + 10, eyeY); ctx.stroke();
+          } else if (ch.acc === 'sunglasses') {
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(cx - 52, eyeY - 16, 44, 30); ctx.fillRect(cx + 8, eyeY - 16, 44, 30);
+            ctx.fillRect(cx - 10, eyeY - 6, 20, 6);
+          } else if (ch.acc === 'monocle') {
+            ctx.strokeStyle = '#eab308'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.arc(cx + 30, eyeY, 18, 0, Math.PI * 2); ctx.stroke();
           }
 
           if (ch.bg !== 'greenscreen') {
